@@ -16,20 +16,13 @@ export class AuthController {
   ) {
     const result = await this.authService.login(loginDto);
     
-    console.log('Setting cookie for user:', result.user.email);
+    console.log('Login successful for user:', result.user.email);
     
-    // Встановлення HTTP-only cookie з токеном
-    response.cookie('token', result.token, {
-      httpOnly: true,
-      secure: true, // Завжди true для HTTPS
-      sameSite: 'none', // Дозволяє cross-site cookies
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 днів
-      path: '/', // Додано path
-    });
-
+    // Повертаємо токен в response для збереження на frontend
     return {
       success: result.success,
       user: result.user,
+      token: result.token, // Додано токен в response
     };
   }
 

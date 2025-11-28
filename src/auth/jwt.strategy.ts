@@ -9,10 +9,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private authService: AuthService) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
+        ExtractJwt.fromAuthHeaderAsBearerToken(), // Спочатку перевіряємо Authorization header
         (request: Request) => {
-          return request?.cookies?.token;
+          return request?.cookies?.token; // Потім cookies (для локальної розробки)
         },
-        ExtractJwt.fromAuthHeaderAsBearerToken(),
       ]),
       ignoreExpiration: false,
       secretOrKey: process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production',
