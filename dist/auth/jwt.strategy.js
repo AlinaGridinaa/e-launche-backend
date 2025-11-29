@@ -19,10 +19,10 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
     constructor(authService) {
         super({
             jwtFromRequest: passport_jwt_1.ExtractJwt.fromExtractors([
+                passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
                 (request) => {
                     return request?.cookies?.token;
                 },
-                passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
             ]),
             ignoreExpiration: false,
             secretOrKey: process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production',
@@ -30,9 +30,11 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
         this.authService = authService;
     }
     async validate(payload) {
+        console.log('JWT payload:', payload);
         const user = await this.authService.validateUser(payload.sub);
+        console.log('User found:', user ? user.email : 'null');
         if (!user) {
-            throw new common_1.UnauthorizedException();
+            throw new common_1.UnauthorizedException('User not found');
         }
         return user;
     }

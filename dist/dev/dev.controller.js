@@ -175,6 +175,63 @@ let DevController = class DevController {
             };
         }
     }
+    async fixFaculty() {
+        try {
+            const user = await this.userModel.findOne({ email: 'test@hogwarts.com' });
+            if (!user) {
+                return {
+                    success: false,
+                    message: 'User not found',
+                };
+            }
+            user.faculty = 'Продюсер';
+            await user.save();
+            return {
+                success: true,
+                message: 'Faculty updated successfully',
+                user: {
+                    email: user.email,
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                    faculty: user.faculty,
+                },
+            };
+        }
+        catch (error) {
+            return {
+                success: false,
+                error: error.message,
+            };
+        }
+    }
+    async resetWelcomeModal() {
+        try {
+            const user = await this.userModel.findOne({ email: 'test@hogwarts.com' });
+            if (!user) {
+                return {
+                    success: false,
+                    message: 'User not found',
+                };
+            }
+            user.hasSeenWelcomeModal = false;
+            await user.save();
+            return {
+                success: true,
+                message: 'Welcome modal reset successfully',
+                user: {
+                    email: user.email,
+                    hasSeenWelcomeModal: user.hasSeenWelcomeModal,
+                    faculty: user.faculty,
+                },
+            };
+        }
+        catch (error) {
+            return {
+                success: false,
+                error: error.message,
+            };
+        }
+    }
     async seedModules() {
         try {
             await this.modulesService.deleteAll();
@@ -378,6 +435,20 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], DevController.prototype, "seedSchedule", null);
+__decorate([
+    (0, common_1.Post)('fix-faculty'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], DevController.prototype, "fixFaculty", null);
+__decorate([
+    (0, common_1.Post)('reset-welcome-modal'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], DevController.prototype, "resetWelcomeModal", null);
 __decorate([
     (0, common_1.Post)('seed-modules'),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),

@@ -21,7 +21,13 @@ let User = class User {
     faculty;
     hasCompletedSorting;
     hasAcceptedRules;
+    hasSeenWelcomeModal;
     isAdmin;
+    favoriteLessons;
+    completedLessons;
+    completedModules;
+    earnings;
+    earningsHistory;
 };
 exports.User = User;
 __decorate([
@@ -63,7 +69,53 @@ __decorate([
 __decorate([
     (0, mongoose_1.Prop)({ default: false }),
     __metadata("design:type", Boolean)
+], User.prototype, "hasSeenWelcomeModal", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ default: false }),
+    __metadata("design:type", Boolean)
 ], User.prototype, "isAdmin", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({
+        type: [{
+                moduleId: { type: String, required: true },
+                lessonNumber: { type: Number, required: true },
+                addedAt: { type: Date, default: Date.now }
+            }],
+        default: []
+    }),
+    __metadata("design:type", Array)
+], User.prototype, "favoriteLessons", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({
+        type: [{
+                moduleId: { type: String, required: true },
+                lessonNumber: { type: Number, required: true },
+                completedAt: { type: Date, default: Date.now }
+            }],
+        default: []
+    }),
+    __metadata("design:type", Array)
+], User.prototype, "completedLessons", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: [String], default: [] }),
+    __metadata("design:type", Array)
+], User.prototype, "completedModules", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ default: 0 }),
+    __metadata("design:type", Number)
+], User.prototype, "earnings", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({
+        type: [{
+                amount: { type: Number, required: true },
+                date: { type: Date, required: true },
+                description: String,
+                createdAt: { type: Date, default: Date.now }
+            }],
+        default: []
+    }),
+    __metadata("design:type", Array)
+], User.prototype, "earningsHistory", void 0);
 exports.User = User = __decorate([
     (0, mongoose_1.Schema)({ timestamps: true })
 ], User);

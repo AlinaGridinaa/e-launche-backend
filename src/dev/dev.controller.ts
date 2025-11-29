@@ -142,6 +142,74 @@ export class DevController {
     }
   }
 
+  @Post('fix-faculty')
+  @HttpCode(HttpStatus.OK)
+  async fixFaculty() {
+    try {
+      // Оновлюємо факультет тестового користувача на правильний
+      const user = await this.userModel.findOne({ email: 'test@hogwarts.com' });
+      
+      if (!user) {
+        return {
+          success: false,
+          message: 'User not found',
+        };
+      }
+
+      user.faculty = 'Продюсер'; // Один з трьох правильних: Продюсер, Експерт, Досвідчений
+      await user.save();
+
+      return {
+        success: true,
+        message: 'Faculty updated successfully',
+        user: {
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          faculty: user.faculty,
+        },
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  @Post('reset-welcome-modal')
+  @HttpCode(HttpStatus.OK)
+  async resetWelcomeModal() {
+    try {
+      const user = await this.userModel.findOne({ email: 'test@hogwarts.com' });
+      
+      if (!user) {
+        return {
+          success: false,
+          message: 'User not found',
+        };
+      }
+
+      user.hasSeenWelcomeModal = false;
+      await user.save();
+
+      return {
+        success: true,
+        message: 'Welcome modal reset successfully',
+        user: {
+          email: user.email,
+          hasSeenWelcomeModal: user.hasSeenWelcomeModal,
+          faculty: user.faculty,
+        },
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
   @Post('seed-modules')
   @HttpCode(HttpStatus.OK)
   async seedModules() {

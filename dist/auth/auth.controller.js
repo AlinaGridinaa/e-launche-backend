@@ -24,22 +24,24 @@ let AuthController = class AuthController {
     }
     async login(loginDto, response) {
         const result = await this.authService.login(loginDto);
-        response.cookie('token', result.token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-        });
+        console.log('Login successful for user:', result.user.email);
         return {
             success: result.success,
             user: result.user,
+            token: result.token,
         };
     }
     logout(response) {
-        response.clearCookie('token');
+        response.clearCookie('token', {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none',
+        });
         return { success: true, message: 'Ви успішно вийшли' };
     }
     async getProfile(request) {
+        console.log('Cookies received:', request.cookies);
+        console.log('Token from cookie:', request.cookies?.token);
         return {
             success: true,
             user: request.user,

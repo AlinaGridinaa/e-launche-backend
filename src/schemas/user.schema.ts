@@ -33,7 +33,61 @@ export class User {
   hasAcceptedRules: boolean;
 
   @Prop({ default: false })
+  hasSeenWelcomeModal: boolean;
+
+  @Prop({ default: false })
   isAdmin: boolean;
+
+  @Prop({ 
+    type: [{ 
+      moduleId: { type: String, required: true },
+      lessonNumber: { type: Number, required: true },
+      addedAt: { type: Date, default: Date.now }
+    }], 
+    default: [] 
+  })
+  favoriteLessons: Array<{
+    moduleId: string;
+    lessonNumber: number;
+    addedAt: Date;
+  }>;
+
+  @Prop({ 
+    type: [{ 
+      moduleId: { type: String, required: true },
+      lessonNumber: { type: Number, required: true },
+      completedAt: { type: Date, default: Date.now }
+    }], 
+    default: [] 
+  })
+  completedLessons: Array<{
+    moduleId: string;
+    lessonNumber: number;
+    completedAt: Date;
+  }>;
+
+  @Prop({ type: [String], default: [] })
+  completedModules: string[];
+
+  @Prop({ default: 0 })
+  earnings: number;
+
+  @Prop({ 
+    type: [{ 
+      amount: { type: Number, required: true },
+      date: { type: Date, required: true },
+      description: String,
+      createdAt: { type: Date, default: Date.now }
+    }], 
+    default: [] 
+  })
+  earningsHistory: Array<{
+    _id?: string;
+    amount: number;
+    date: Date;
+    description?: string;
+    createdAt: Date;
+  }>;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

@@ -68,6 +68,47 @@ export declare class DevController {
         count?: undefined;
         events?: undefined;
     }>;
+    fixFaculty(): Promise<{
+        success: boolean;
+        message: string;
+        user?: undefined;
+        error?: undefined;
+    } | {
+        success: boolean;
+        message: string;
+        user: {
+            email: string;
+            firstName: string;
+            lastName: string;
+            faculty: string;
+        };
+        error?: undefined;
+    } | {
+        success: boolean;
+        error: any;
+        message?: undefined;
+        user?: undefined;
+    }>;
+    resetWelcomeModal(): Promise<{
+        success: boolean;
+        message: string;
+        user?: undefined;
+        error?: undefined;
+    } | {
+        success: boolean;
+        message: string;
+        user: {
+            email: string;
+            hasSeenWelcomeModal: boolean;
+            faculty: string | undefined;
+        };
+        error?: undefined;
+    } | {
+        success: boolean;
+        error: any;
+        message?: undefined;
+        user?: undefined;
+    }>;
     seedModules(): Promise<{
         success: boolean;
         message: string;
