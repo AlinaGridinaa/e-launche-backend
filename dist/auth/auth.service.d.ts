@@ -5,6 +5,7 @@ import { LoginDto } from './dto/login.dto';
 export declare class AuthService {
     private userModel;
     private jwtService;
+    private readonly logger;
     constructor(userModel: Model<UserDocument>, jwtService: JwtService);
     login(loginDto: LoginDto): Promise<{
         success: boolean;
@@ -19,6 +20,8 @@ export declare class AuthService {
             hasAcceptedRules: boolean;
             hasSeenWelcomeModal: boolean;
             isAdmin: boolean;
+            isCurator: boolean;
+            curatorId?: string;
             favoriteLessons: Array<{
                 moduleId: string;
                 lessonNumber: number;
@@ -38,6 +41,13 @@ export declare class AuthService {
                 description?: string;
                 createdAt: Date;
             }>;
+            achievements: Array<{
+                _id?: string;
+                title: string;
+                description: string;
+                imageUrl: string;
+                awardedAt: Date;
+            }>;
             _id: import("mongoose").Types.ObjectId;
             $locals: Record<string, unknown>;
             $op: "save" | "validate" | "remove" | null;
@@ -52,6 +62,8 @@ export declare class AuthService {
             __v: number;
         };
         token: string;
+        isAdmin: boolean;
+        isCurator: boolean;
     }>;
     private generateToken;
     validateUser(userId: string): Promise<(import("mongoose").Document<unknown, {}, UserDocument, {}, {}> & User & import("mongoose").Document<import("mongoose").Types.ObjectId, any, any, Record<string, any>, {}> & Required<{

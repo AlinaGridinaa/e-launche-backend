@@ -1,7 +1,9 @@
-import { Controller, Get, Put, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Put, Post, Delete, Body, Param, UseGuards } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AssignFacultyDto } from './dto/assign-faculty.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { AwardAchievementDto } from './dto/award-achievement.dto';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard)
@@ -11,6 +13,11 @@ export class AdminController {
   @Get('users')
   async getAllUsers() {
     return this.adminService.getAllUsers();
+  }
+
+  @Post('users')
+  async createUser(@Body() createUserDto: CreateUserDto) {
+    return this.adminService.createUser(createUserDto);
   }
 
   @Put('users/:userId/faculty')
@@ -29,5 +36,155 @@ export class AdminController {
   @Get('stats')
   async getStats() {
     return this.adminService.getStats();
+  }
+
+  @Post('users/:userId/achievements')
+  async awardAchievement(
+    @Param('userId') userId: string,
+    @Body() achievementDto: AwardAchievementDto,
+  ) {
+    return this.adminService.awardAchievement(userId, achievementDto);
+  }
+
+  @Get('users/:userId/achievements')
+  async getUserAchievements(@Param('userId') userId: string) {
+    return this.adminService.getUserAchievements(userId);
+  }
+
+  @Delete('users/:userId/achievements/:achievementId')
+  async removeAchievement(
+    @Param('userId') userId: string,
+    @Param('achievementId') achievementId: string,
+  ) {
+    return this.adminService.removeAchievement(userId, achievementId);
+  }
+
+  @Put('users/:userId/curator-toggle')
+  async toggleCurator(@Param('userId') userId: string) {
+    return this.adminService.toggleCurator(userId);
+  }
+
+  @Put('users/:userId/assign-curator')
+  async assignCurator(
+    @Param('userId') userId: string,
+    @Body() body: { curatorId: string },
+  ) {
+    return this.adminService.assignCurator(userId, body.curatorId);
+  }
+
+  @Get('curators')
+  async getAllCurators() {
+    return this.adminService.getAllCurators();
+  }
+
+  // ===== MODULES ENDPOINTS =====
+
+  @Get('modules')
+  async getAllModules() {
+    return this.adminService.getAllModules();
+  }
+
+  @Get('modules/:moduleId')
+  async getModuleById(@Param('moduleId') moduleId: string) {
+    return this.adminService.getModuleById(moduleId);
+  }
+
+  @Post('modules')
+  async createModule(@Body() moduleData: {
+    number: number;
+    title: string;
+    description?: string;
+    category?: string;
+    isLocked?: boolean;
+    unlockDate?: Date;
+  }) {
+    return this.adminService.createModule(moduleData);
+  }
+
+  @Put('modules/:moduleId')
+  async updateModule(
+    @Param('moduleId') moduleId: string,
+    @Body() updateData: {
+      number?: number;
+      title?: string;
+      description?: string;
+      category?: string;
+      isLocked?: boolean;
+      unlockDate?: Date;
+    }
+  ) {
+    return this.adminService.updateModule(moduleId, updateData);
+  }
+
+  @Delete('modules/:moduleId')
+  async deleteModule(@Param('moduleId') moduleId: string) {
+    return this.adminService.deleteModule(moduleId);
+  }
+
+  @Put('modules/:moduleId/toggle-lock')
+  async toggleModuleLock(@Param('moduleId') moduleId: string) {
+    return this.adminService.toggleModuleLock(moduleId);
+  }
+
+  // ===== LESSONS ENDPOINTS =====
+
+  @Post('modules/:moduleId/lessons')
+  async createLesson(
+    @Param('moduleId') moduleId: string,
+    @Body() lessonData: {
+      number: number;
+      title: string;
+      description?: string;
+      videoUrl?: string;
+      homework?: string;
+      duration?: number;
+    }
+  ) {
+    return this.adminService.createLesson(moduleId, lessonData);
+  }
+
+  @Put('modules/:moduleId/lessons/:lessonNumber')
+  async updateLesson(
+    @Param('moduleId') moduleId: string,
+    @Param('lessonNumber') lessonNumber: number,
+    @Body() updateData: {
+      title?: string;
+      description?: string;
+      videoUrl?: string;
+      homework?: string;
+      duration?: number;
+    }
+  ) {
+    return this.adminService.updateLesson(moduleId, +lessonNumber, updateData);
+  }
+
+  @Delete('modules/:moduleId/lessons/:lessonNumber')
+  async deleteLesson(
+    @Param('moduleId') moduleId: string,
+    @Param('lessonNumber') lessonNumber: number,
+  ) {
+    return this.adminService.deleteLesson(moduleId, +lessonNumber);
+  }
+
+  @Post('modules/:moduleId/lessons/:lessonNumber/materials')
+  async addLessonMaterial(
+    @Param('moduleId') moduleId: string,
+    @Param('lessonNumber') lessonNumber: number,
+    @Body() materialData: {
+      type: string;
+      title: string;
+      url: string;
+    }
+  ) {
+    return this.adminService.addLessonMaterial(moduleId, +lessonNumber, materialData);
+  }
+
+  @Delete('modules/:moduleId/lessons/:lessonNumber/materials/:materialIndex')
+  async deleteLessonMaterial(
+    @Param('moduleId') moduleId: string,
+    @Param('lessonNumber') lessonNumber: number,
+    @Param('materialIndex') materialIndex: number,
+  ) {
+    return this.adminService.deleteLessonMaterial(moduleId, +lessonNumber, +materialIndex);
   }
 }

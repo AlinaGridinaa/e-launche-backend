@@ -23,11 +23,14 @@ let User = class User {
     hasAcceptedRules;
     hasSeenWelcomeModal;
     isAdmin;
+    isCurator;
+    curatorId;
     favoriteLessons;
     completedLessons;
     completedModules;
     earnings;
     earningsHistory;
+    achievements;
 };
 exports.User = User;
 __decorate([
@@ -75,6 +78,14 @@ __decorate([
     __metadata("design:type", Boolean)
 ], User.prototype, "isAdmin", void 0);
 __decorate([
+    (0, mongoose_1.Prop)({ default: false }),
+    __metadata("design:type", Boolean)
+], User.prototype, "isCurator", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: String }),
+    __metadata("design:type", String)
+], User.prototype, "curatorId", void 0);
+__decorate([
     (0, mongoose_1.Prop)({
         type: [{
                 moduleId: { type: String, required: true },
@@ -116,6 +127,18 @@ __decorate([
     }),
     __metadata("design:type", Array)
 ], User.prototype, "earningsHistory", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({
+        type: [{
+                title: { type: String, required: true },
+                description: { type: String, required: true },
+                imageUrl: { type: String, required: true },
+                awardedAt: { type: Date, default: Date.now }
+            }],
+        default: []
+    }),
+    __metadata("design:type", Array)
+], User.prototype, "achievements", void 0);
 exports.User = User = __decorate([
     (0, mongoose_1.Schema)({ timestamps: true })
 ], User);

@@ -44,6 +44,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var AuthService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthService = void 0;
 const common_1 = require("@nestjs/common");
@@ -52,9 +53,10 @@ const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
 const bcrypt = __importStar(require("bcryptjs"));
 const user_schema_1 = require("../schemas/user.schema");
-let AuthService = class AuthService {
+let AuthService = AuthService_1 = class AuthService {
     userModel;
     jwtService;
+    logger = new common_1.Logger(AuthService_1.name);
     constructor(userModel, jwtService) {
         this.userModel = userModel;
         this.jwtService = jwtService;
@@ -69,17 +71,25 @@ let AuthService = class AuthService {
         if (!isPasswordValid) {
             throw new common_1.UnauthorizedException('Невірний email або пароль');
         }
-        const token = this.generateToken(user._id.toString(), user.email);
+        const token = this.generateToken(user._id.toString(), user.email, user.isAdmin, user.isCurator);
+        if (user.isAdmin) {
+            this.logger.log(`🔐 Admin login: ${user.email} (${user.firstName} ${user.lastName}) at ${new Date().toISOString()}`);
+        }
+        if (user.isCurator) {
+            this.logger.log(`📚 Curator login: ${user.email} (${user.firstName} ${user.lastName}) at ${new Date().toISOString()}`);
+        }
         const userObject = user.toObject();
         const { password: _, ...userWithoutPassword } = userObject;
         return {
             success: true,
             user: userWithoutPassword,
             token,
+            isAdmin: user.isAdmin || false,
+            isCurator: user.isCurator || false,
         };
     }
-    generateToken(userId, email) {
-        const payload = { sub: userId, email };
+    generateToken(userId, email, isAdmin = false, isCurator = false) {
+        const payload = { sub: userId, email, isAdmin, isCurator };
         return this.jwtService.sign(payload);
     }
     async validateUser(userId) {
@@ -91,7 +101,7 @@ let AuthService = class AuthService {
     }
 };
 exports.AuthService = AuthService;
-exports.AuthService = AuthService = __decorate([
+exports.AuthService = AuthService = AuthService_1 = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, mongoose_1.InjectModel)(user_schema_1.User.name)),
     __metadata("design:paramtypes", [mongoose_2.Model,

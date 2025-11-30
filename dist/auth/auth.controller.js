@@ -40,11 +40,19 @@ let AuthController = class AuthController {
         return { success: true, message: 'Ви успішно вийшли' };
     }
     async getProfile(request) {
-        console.log('Cookies received:', request.cookies);
-        console.log('Token from cookie:', request.cookies?.token);
+        const userId = request.user._id.toString();
+        const user = await this.authService.validateUser(userId);
+        if (!user) {
+            return {
+                success: false,
+                message: 'User not found',
+            };
+        }
+        const userObject = user.toObject();
+        const { password, ...userWithoutPassword } = userObject;
         return {
             success: true,
-            user: request.user,
+            ...userWithoutPassword,
         };
     }
 };

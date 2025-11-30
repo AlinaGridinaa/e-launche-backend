@@ -14,6 +14,8 @@ import { FavoritesModule } from './favorites/favorites.module';
 import { ProfileModule } from './profile/profile.module';
 import { ProgressModule } from './progress/progress.module';
 import { AdminModule } from './admin/admin.module';
+import { CuratorModule } from './curator/curator.module';
+import { HomeworkModule } from './homework/homework.module';
 
 @Module({
   imports: [
@@ -43,6 +45,8 @@ import { AdminModule } from './admin/admin.module';
     ProfileModule,
     ProgressModule,
     AdminModule,
+    CuratorModule,
+    HomeworkModule,
   ],
   controllers: [AppController],
   providers: [AppService],

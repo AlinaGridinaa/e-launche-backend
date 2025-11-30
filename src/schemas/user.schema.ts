@@ -38,6 +38,12 @@ export class User {
   @Prop({ default: false })
   isAdmin: boolean;
 
+  @Prop({ default: false })
+  isCurator: boolean;
+
+  @Prop({ type: String })
+  curatorId?: string; // ID куратора, який відповідає за цього студента
+
   @Prop({ 
     type: [{ 
       moduleId: { type: String, required: true },
@@ -87,6 +93,23 @@ export class User {
     date: Date;
     description?: string;
     createdAt: Date;
+  }>;
+
+  @Prop({ 
+    type: [{ 
+      title: { type: String, required: true },
+      description: { type: String, required: true },
+      imageUrl: { type: String, required: true },
+      awardedAt: { type: Date, default: Date.now }
+    }], 
+    default: [] 
+  })
+  achievements: Array<{
+    _id?: string;
+    title: string;
+    description: string;
+    imageUrl: string;
+    awardedAt: Date;
   }>;
 }
 

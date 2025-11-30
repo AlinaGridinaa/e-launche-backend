@@ -12,6 +12,8 @@ export declare class User {
     hasAcceptedRules: boolean;
     hasSeenWelcomeModal: boolean;
     isAdmin: boolean;
+    isCurator: boolean;
+    curatorId?: string;
     favoriteLessons: Array<{
         moduleId: string;
         lessonNumber: number;
@@ -30,6 +32,13 @@ export declare class User {
         date: Date;
         description?: string;
         createdAt: Date;
+    }>;
+    achievements: Array<{
+        _id?: string;
+        title: string;
+        description: string;
+        imageUrl: string;
+        awardedAt: Date;
     }>;
 }
 export declare const UserSchema: import("mongoose").Schema<User, import("mongoose").Model<User, any, any, any, Document<unknown, any, User, any, {}> & User & {

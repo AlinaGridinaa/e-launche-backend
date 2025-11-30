@@ -40,11 +40,23 @@ export class AuthController {
   @Get('me')
   @UseGuards(JwtAuthGuard)
   async getProfile(@Req() request: Request & { user: any }) {
-    console.log('Cookies received:', request.cookies);
-    console.log('Token from cookie:', request.cookies?.token);
+    const userId = request.user._id.toString();
+    const user = await this.authService.validateUser(userId);
+    
+    if (!user) {
+      return {
+        success: false,
+        message: 'User not found',
+      };
+    }
+
+    // Повертаємо користувача без пароля
+    const userObject = user.toObject();
+    const { password, ...userWithoutPassword } = userObject;
+    
     return {
       success: true,
-      user: request.user,
+      ...userWithoutPassword,
     };
   }
 }

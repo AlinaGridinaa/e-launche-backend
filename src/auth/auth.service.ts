@@ -33,12 +33,24 @@ export class AuthService {
     }
 
     // Генерація JWT токену
-    const token = this.generateToken(user._id.toString(), user.email, user.isAdmin);
+    const token = this.generateToken(
+      user._id.toString(), 
+      user.email, 
+      user.isAdmin, 
+      user.isCurator
+    );
 
     // Логування входу адміна
     if (user.isAdmin) {
       this.logger.log(
         `🔐 Admin login: ${user.email} (${user.firstName} ${user.lastName}) at ${new Date().toISOString()}`,
+      );
+    }
+
+    // Логування входу куратора
+    if (user.isCurator) {
+      this.logger.log(
+        `📚 Curator login: ${user.email} (${user.firstName} ${user.lastName}) at ${new Date().toISOString()}`,
       );
     }
 
@@ -51,11 +63,17 @@ export class AuthService {
       user: userWithoutPassword,
       token,
       isAdmin: user.isAdmin || false,
+      isCurator: user.isCurator || false,
     };
   }
 
-  private generateToken(userId: string, email: string, isAdmin: boolean = false): string {
-    const payload = { sub: userId, email, isAdmin };
+  private generateToken(
+    userId: string, 
+    email: string, 
+    isAdmin: boolean = false,
+    isCurator: boolean = false
+  ): string {
+    const payload = { sub: userId, email, isAdmin, isCurator };
     return this.jwtService.sign(payload);
   }
 
