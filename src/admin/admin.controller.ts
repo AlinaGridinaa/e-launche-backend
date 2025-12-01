@@ -1,9 +1,11 @@
-import { Controller, Get, Put, Post, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Put, Post, Delete, Body, Param, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { AdminService } from './admin.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AssignFacultyDto } from './dto/assign-faculty.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { AwardAchievementDto } from './dto/award-achievement.dto';
+import { avatarStorage, imageFileFilter } from '../config/multer.config';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard)
@@ -216,5 +218,26 @@ export class AdminController {
   @Post('avatars/initialize')
   async initializeDefaultAvatars() {
     return this.adminService.initializeDefaultAvatars();
+  }
+
+  @Post('avatars/:level/upload')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: avatarStorage,
+      fileFilter: imageFileFilter,
+      limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+    }),
+  )
+  async uploadAvatarImage(
+    @Param('level') level: number,
+    @UploadedFile() file: Express.Multer.File,
+    @Body('description') description?: string,
+  ) {
+    if (!file) {
+      throw new Error('Файл не завантажено');
+    }
+
+    const imageUrl = `/uploads/avatars/${file.filename}`;
+    return this.adminService.setAvatarLevel(+level, imageUrl, description);
   }
 }
