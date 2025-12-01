@@ -29,11 +29,11 @@ let ModulesService = class ModulesService {
         return this.moduleModel.find().exec();
     }
     async findAllWithUserProgress(userId) {
-        const modules = await this.moduleModel.find().exec();
+        const modules = await this.moduleModel.find().lean().exec();
         const user = await this.userModel.findById(userId).exec();
         if (!user || !user.completedLessons) {
             return modules.map(module => ({
-                ...module.toObject(),
+                ...module,
                 lessons: module.lessons.map(lesson => ({
                     ...lesson,
                     isCompleted: false,
@@ -41,10 +41,10 @@ let ModulesService = class ModulesService {
             }));
         }
         return modules.map(module => ({
-            ...module.toObject(),
+            ...module,
             lessons: module.lessons.map(lesson => ({
                 ...lesson,
-                isCompleted: user.completedLessons.some(cl => cl.moduleId === module._id.toString() && cl.lessonNumber === lesson.number),
+                isCompleted: user.completedLessons.some(cl => cl.moduleId.toString() === module._id.toString() && cl.lessonNumber === lesson.number),
             })),
         }));
     }
@@ -52,13 +52,13 @@ let ModulesService = class ModulesService {
         return this.moduleModel.findById(id).exec();
     }
     async findByIdWithUserProgress(id, userId) {
-        const module = await this.moduleModel.findById(id).exec();
+        const module = await this.moduleModel.findById(id).lean().exec();
         if (!module)
             return null;
         const user = await this.userModel.findById(userId).exec();
         if (!user || !user.completedLessons) {
             return {
-                ...module.toObject(),
+                ...module,
                 lessons: module.lessons.map(lesson => ({
                     ...lesson,
                     isCompleted: false,
@@ -66,10 +66,10 @@ let ModulesService = class ModulesService {
             };
         }
         return {
-            ...module.toObject(),
+            ...module,
             lessons: module.lessons.map(lesson => ({
                 ...lesson,
-                isCompleted: user.completedLessons.some(cl => cl.moduleId === module._id.toString() && cl.lessonNumber === lesson.number),
+                isCompleted: user.completedLessons.some(cl => cl.moduleId.toString() === module._id.toString() && cl.lessonNumber === lesson.number),
             })),
         };
     }

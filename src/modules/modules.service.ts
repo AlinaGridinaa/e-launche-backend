@@ -16,12 +16,12 @@ export class ModulesService {
   }
 
   async findAllWithUserProgress(userId: string): Promise<Module[]> {
-    const modules = await this.moduleModel.find().exec();
+    const modules = await this.moduleModel.find().lean().exec();
     const user = await this.userModel.findById(userId).exec();
 
     if (!user || !user.completedLessons) {
       return modules.map(module => ({
-        ...module.toObject(),
+        ...module,
         lessons: module.lessons.map(lesson => ({
           ...lesson,
           isCompleted: false,
@@ -30,11 +30,11 @@ export class ModulesService {
     }
 
     return modules.map(module => ({
-      ...module.toObject(),
+      ...module,
       lessons: module.lessons.map(lesson => ({
         ...lesson,
         isCompleted: user.completedLessons.some(
-          cl => cl.moduleId === module._id.toString() && cl.lessonNumber === lesson.number
+          cl => cl.moduleId.toString() === module._id.toString() && cl.lessonNumber === lesson.number
         ),
       })),
     })) as Module[];
@@ -45,13 +45,14 @@ export class ModulesService {
   }
 
   async findByIdWithUserProgress(id: string, userId: string): Promise<Module | null> {
-    const module = await this.moduleModel.findById(id).exec();
+    const module = await this.moduleModel.findById(id).lean().exec();
     if (!module) return null;
 
     const user = await this.userModel.findById(userId).exec();
+    
     if (!user || !user.completedLessons) {
       return {
-        ...module.toObject(),
+        ...module,
         lessons: module.lessons.map(lesson => ({
           ...lesson,
           isCompleted: false,
@@ -60,11 +61,11 @@ export class ModulesService {
     }
 
     return {
-      ...module.toObject(),
+      ...module,
       lessons: module.lessons.map(lesson => ({
         ...lesson,
         isCompleted: user.completedLessons.some(
-          cl => cl.moduleId === module._id.toString() && cl.lessonNumber === lesson.number
+          cl => cl.moduleId.toString() === module._id.toString() && cl.lessonNumber === lesson.number
         ),
       })),
     } as Module;
