@@ -237,7 +237,13 @@ export class AdminController {
       throw new Error('Файл не завантажено');
     }
 
-    const imageUrl = `/uploads/avatars/${file.filename}`;
+    // Завантажуємо на Cloudinary і отримуємо URL
+    const imageUrl = await this.adminService.uploadAvatarToCloudinary(file.path);
+    
+    // Видаляємо локальний файл після завантаження
+    const fs = require('fs');
+    fs.unlinkSync(file.path);
+    
     return this.adminService.setAvatarLevel(+level, imageUrl, description);
   }
 }

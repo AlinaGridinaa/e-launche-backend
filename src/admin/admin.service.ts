@@ -8,6 +8,7 @@ import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from './dto/create-user.dto';
 import { AwardAchievementDto } from './dto/award-achievement.dto';
 import { getAvatarForLevel, setAvatarCache, clearAvatarCache } from '../config/avatars.config';
+import { uploadToCloudinary } from '../config/cloudinary.config';
 
 @Injectable()
 export class AdminService {
@@ -30,6 +31,16 @@ export class AdminService {
       setAvatarCache(avatarMap);
     } catch (error) {
       console.error('Failed to load avatars to cache:', error);
+    }
+  }
+
+  async uploadAvatarToCloudinary(filePath: string): Promise<string> {
+    try {
+      const imageUrl = await uploadToCloudinary(filePath, 'avatars');
+      return imageUrl;
+    } catch (error) {
+      console.error('Failed to upload avatar to Cloudinary:', error);
+      throw new Error('Не вдалося завантажити аватар в Cloudinary');
     }
   }
 
