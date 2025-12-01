@@ -3,16 +3,35 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from '../schemas/user.schema';
 import { Module, ModuleDocument } from '../schemas/module.schema';
+import { AvatarLevel, AvatarLevelDocument } from '../schemas/avatar-level.schema';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from './dto/create-user.dto';
 import { AwardAchievementDto } from './dto/award-achievement.dto';
+import { getAvatarForLevel, setAvatarCache, clearAvatarCache } from '../config/avatars.config';
 
 @Injectable()
 export class AdminService {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     @InjectModel(Module.name) private moduleModel: Model<ModuleDocument>,
-  ) {}
+    @InjectModel(AvatarLevel.name) private avatarLevelModel: Model<AvatarLevelDocument>,
+  ) {
+    // Завантажуємо аватари в кеш при старті
+    this.loadAvatarsToCache();
+  }
+
+  private async loadAvatarsToCache() {
+    try {
+      const avatars = await this.avatarLevelModel.find().sort({ level: 1 });
+      const avatarMap: Record<number, string> = {};
+      avatars.forEach(avatar => {
+        avatarMap[avatar.level] = avatar.imageUrl;
+      });
+      setAvatarCache(avatarMap);
+    } catch (error) {
+      console.error('Failed to load avatars to cache:', error);
+    }
+  }
 
   async getAllUsers() {
     const users = await this.userModel
@@ -112,6 +131,8 @@ export class AdminService {
       earnings: 0,
       completedLessons: [],
       completedModules: [],
+      currentAvatarLevel: 0,
+      avatarUrl: getAvatarForLevel(0),
     });
 
     await newUser.save();
@@ -466,5 +487,86 @@ export class AdminService {
     await module.save();
 
     return lesson;
+  }
+
+  // ===== AVATAR LEVELS MANAGEMENT =====
+
+  async getAllAvatarLevels() {
+    return this.avatarLevelModel.find().sort({ level: 1 });
+  }
+
+  async getAvatarLevel(level: number) {
+    const avatar = await this.avatarLevelModel.findOne({ level });
+    if (!avatar) {
+      throw new NotFoundException(`Аватар для рівня ${level} не знайдено`);
+    }
+    return avatar;
+  }
+
+  async setAvatarLevel(level: number, imageUrl: string, description?: string) {
+    const existingAvatar = await this.avatarLevelModel.findOne({ level });
+
+    if (existingAvatar) {
+      // Оновлюємо існуючий
+      existingAvatar.imageUrl = imageUrl;
+      if (description !== undefined) {
+        existingAvatar.description = description;
+      }
+      await existingAvatar.save();
+      
+      // Оновлюємо кеш
+      await this.loadAvatarsToCache();
+      
+      return existingAvatar;
+    } else {
+      // Створюємо новий
+      const newAvatar = await this.avatarLevelModel.create({
+        level,
+        imageUrl,
+        description,
+      });
+      
+      // Оновлюємо кеш
+      await this.loadAvatarsToCache();
+      
+      return newAvatar;
+    }
+  }
+
+  async deleteAvatarLevel(level: number) {
+    const avatar = await this.avatarLevelModel.findOneAndDelete({ level });
+    if (!avatar) {
+      throw new NotFoundException(`Аватар для рівня ${level} не знайдено`);
+    }
+    
+    // Оновлюємо кеш
+    await this.loadAvatarsToCache();
+    
+    return { message: `Аватар для рівня ${level} видалено` };
+  }
+
+  async initializeDefaultAvatars() {
+    // Перевіряємо, чи вже є аватари
+    const existingCount = await this.avatarLevelModel.countDocuments();
+    if (existingCount > 0) {
+      return { message: 'Аватари вже ініціалізовані', count: existingCount };
+    }
+
+    // Створюємо дефолтні аватари
+    const defaultAvatars: Array<{ level: number; imageUrl: string; description: string }> = [];
+    for (let i = 0; i <= 10; i++) {
+      defaultAvatars.push({
+        level: i,
+        imageUrl: `/avatars/level-${i}.png`,
+        description: i === 0 ? 'Початковий аватар' : `Аватар після ${i} модуля`,
+      });
+    }
+
+    await this.avatarLevelModel.insertMany(defaultAvatars);
+    
+    // Оновлюємо кеш
+    await this.loadAvatarsToCache();
+
+    return { message: 'Дефолтні аватари створено', count: 11 };
   }
 }

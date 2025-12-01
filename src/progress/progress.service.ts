@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from '../schemas/user.schema';
+import { getAvatarForLevel, getLevelByCompletedModules } from '../config/avatars.config';
 
 @Injectable()
 export class ProgressService {
@@ -76,6 +77,12 @@ export class ProgressService {
 
     if (!user.completedModules.includes(moduleId)) {
       user.completedModules.push(moduleId);
+      
+      // Оновлюємо рівень аватара та сам аватар
+      const newLevel = getLevelByCompletedModules(user.completedModules.length);
+      user.currentAvatarLevel = newLevel;
+      user.avatarUrl = getAvatarForLevel(newLevel);
+      
       await user.save();
     }
 
@@ -83,6 +90,8 @@ export class ProgressService {
       success: true,
       message: 'Модуль позначено як завершений',
       completedModules: user.completedModules.length,
+      newAvatarLevel: user.currentAvatarLevel,
+      newAvatarUrl: user.avatarUrl,
     };
   }
 

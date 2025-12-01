@@ -187,4 +187,34 @@ export class AdminController {
   ) {
     return this.adminService.deleteLessonMaterial(moduleId, +lessonNumber, +materialIndex);
   }
+
+  // ===== AVATAR LEVELS ENDPOINTS =====
+
+  @Get('avatars')
+  async getAllAvatarLevels() {
+    return this.adminService.getAllAvatarLevels();
+  }
+
+  @Get('avatars/:level')
+  async getAvatarLevel(@Param('level') level: number) {
+    return this.adminService.getAvatarLevel(+level);
+  }
+
+  @Put('avatars/:level')
+  async setAvatarLevel(
+    @Param('level') level: number,
+    @Body() body: { imageUrl: string; description?: string },
+  ) {
+    return this.adminService.setAvatarLevel(+level, body.imageUrl, body.description);
+  }
+
+  @Delete('avatars/:level')
+  async deleteAvatarLevel(@Param('level') level: number) {
+    return this.adminService.deleteAvatarLevel(+level);
+  }
+
+  @Post('avatars/initialize')
+  async initializeDefaultAvatars() {
+    return this.adminService.initializeDefaultAvatars();
+  }
 }

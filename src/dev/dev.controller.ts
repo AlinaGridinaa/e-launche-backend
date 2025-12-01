@@ -5,6 +5,7 @@ import * as bcrypt from 'bcryptjs';
 import { User, UserDocument } from '../schemas/user.schema';
 import { ScheduleEvent, ScheduleEventDocument, EventType } from '../schemas/schedule-event.schema';
 import { ModulesService } from '../modules/modules.service';
+import { getAvatarForLevel } from '../config/avatars.config';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -35,6 +36,8 @@ export class DevController {
         faculty: 'Гріфіндор',
         hasCompletedSorting: true,
         hasAcceptedRules: true,
+        currentAvatarLevel: 0,
+        avatarUrl: getAvatarForLevel(0),
       });
 
       // Створюємо адмін користувача
@@ -46,6 +49,8 @@ export class DevController {
         isAdmin: true,
         hasCompletedSorting: true,
         hasAcceptedRules: true,
+        currentAvatarLevel: 0,
+        avatarUrl: getAvatarForLevel(0),
       });
 
       return {

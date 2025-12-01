@@ -23,6 +23,9 @@ export class User {
   @Prop()
   avatarUrl?: string;
 
+  @Prop({ default: 0 })
+  currentAvatarLevel: number; // Рівень аватара (0 = початковий, 1-10 = за модулі)
+
   @Prop()
   faculty?: string;
 
