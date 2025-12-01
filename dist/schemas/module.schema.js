@@ -21,6 +21,8 @@ let Module = class Module {
     lessons;
     progress;
     category;
+    surveyFormUrl;
+    surveyFormTitle;
 };
 exports.Module = Module;
 __decorate([
@@ -55,6 +57,14 @@ __decorate([
     (0, mongoose_1.Prop)(),
     __metadata("design:type", String)
 ], Module.prototype, "category", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], Module.prototype, "surveyFormUrl", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], Module.prototype, "surveyFormTitle", void 0);
 exports.Module = Module = __decorate([
     (0, mongoose_1.Schema)({ timestamps: true })
 ], Module);

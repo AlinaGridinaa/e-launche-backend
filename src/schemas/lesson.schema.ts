@@ -5,13 +5,16 @@ export type LessonDocument = Lesson & Document;
 
 export class LessonMaterial {
   @Prop({ required: true })
-  type: string; // 'pdf', 'link', 'video', 'spreadsheet', 'document'
+  type: string; // 'pdf', 'link', 'video', 'spreadsheet', 'document', 'form'
 
   @Prop({ required: true })
   title: string;
 
   @Prop({ required: true })
   url: string;
+
+  @Prop()
+  icon?: string; // optional icon name for custom display
 }
 
 @Schema({ timestamps: true })

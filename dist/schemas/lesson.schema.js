@@ -15,6 +15,7 @@ class LessonMaterial {
     type;
     title;
     url;
+    icon;
 }
 exports.LessonMaterial = LessonMaterial;
 __decorate([
@@ -29,6 +30,10 @@ __decorate([
     (0, mongoose_1.Prop)({ required: true }),
     __metadata("design:type", String)
 ], LessonMaterial.prototype, "url", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], LessonMaterial.prototype, "icon", void 0);
 let Lesson = class Lesson {
     number;
     title;

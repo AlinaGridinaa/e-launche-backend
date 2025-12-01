@@ -29,6 +29,12 @@ export class Module {
 
   @Prop()
   category: string; // e.g., "Бізнес", "Маркетинг", etc.
+
+  @Prop()
+  surveyFormUrl?: string; // Google Form or other survey link
+
+  @Prop()
+  surveyFormTitle?: string; // Title for the survey form
 }
 
 export const ModuleSchema = SchemaFactory.createForClass(Module);

@@ -52,7 +52,7 @@ let AuthController = class AuthController {
         const { password, ...userWithoutPassword } = userObject;
         return {
             success: true,
-            ...userWithoutPassword,
+            user: userWithoutPassword,
         };
     }
 };

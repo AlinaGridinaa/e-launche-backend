@@ -4,6 +4,7 @@ export declare class LessonMaterial {
     type: string;
     title: string;
     url: string;
+    icon?: string;
 }
 export declare class Lesson {
     number: number;

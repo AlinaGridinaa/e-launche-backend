@@ -10,6 +10,8 @@ export declare class Module {
     lessons: Lesson[];
     progress: number;
     category: string;
+    surveyFormUrl?: string;
+    surveyFormTitle?: string;
 }
 export declare const ModuleSchema: import("mongoose").Schema<Module, import("mongoose").Model<Module, any, any, any, Document<unknown, any, Module, any, {}> & Module & {
     _id: import("mongoose").Types.ObjectId;
