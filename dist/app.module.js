@@ -25,6 +25,7 @@ const progress_module_1 = require("./progress/progress.module");
 const admin_module_1 = require("./admin/admin.module");
 const curator_module_1 = require("./curator/curator.module");
 const homework_module_1 = require("./homework/homework.module");
+const achievements_module_1 = require("./achievements/achievements.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -59,6 +60,7 @@ exports.AppModule = AppModule = __decorate([
             admin_module_1.AdminModule,
             curator_module_1.CuratorModule,
             homework_module_1.HomeworkModule,
+            achievements_module_1.AchievementsModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

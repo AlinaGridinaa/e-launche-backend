@@ -16,6 +16,7 @@ import { ProgressModule } from './progress/progress.module';
 import { AdminModule } from './admin/admin.module';
 import { CuratorModule } from './curator/curator.module';
 import { HomeworkModule } from './homework/homework.module';
+import { AchievementsModule } from './achievements/achievements.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { HomeworkModule } from './homework/homework.module';
     AdminModule,
     CuratorModule,
     HomeworkModule,
+    AchievementsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
