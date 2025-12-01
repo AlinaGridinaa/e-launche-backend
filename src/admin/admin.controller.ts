@@ -246,4 +246,9 @@ export class AdminController {
     
     return this.adminService.setAvatarLevel(+level, imageUrl, description);
   }
+
+  @Get('lesson-ratings')
+  async getLessonRatings(@Param('moduleId') moduleId?: string) {
+    return this.adminService.getLessonRatingsStatistics(moduleId);
+  }
 }

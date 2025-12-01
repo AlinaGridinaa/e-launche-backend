@@ -580,4 +580,45 @@ export class AdminService {
 
     return { message: 'Дефолтні аватари створено', count: 11 };
   }
+
+  // Статистика оцінок уроків
+  async getLessonRatingsStatistics(moduleId?: string) {
+    const users = await this.userModel.find().select('completedLessons firstName lastName email').exec();
+    
+    const ratings: Array<{
+      userId: any;
+      userEmail: string;
+      userName: string;
+      moduleId: string;
+      lessonNumber: number;
+      moodRating?: number;
+      usefulnessRating?: number;
+      completedAt: Date;
+    }> = [];
+    
+    for (const user of users) {
+      if (!user.completedLessons || user.completedLessons.length === 0) continue;
+      
+      for (const lesson of user.completedLessons) {
+        // Фільтруємо за moduleId якщо вказано
+        if (moduleId && lesson.moduleId !== moduleId) continue;
+        
+        // Додаємо тільки якщо є оцінки
+        if (lesson.moodRating || lesson.usefulnessRating) {
+          ratings.push({
+            userId: user._id,
+            userEmail: user.email,
+            userName: `${user.firstName} ${user.lastName}`,
+            moduleId: lesson.moduleId,
+            lessonNumber: lesson.lessonNumber,
+            moodRating: lesson.moodRating,
+            usefulnessRating: lesson.usefulnessRating,
+            completedAt: lesson.completedAt,
+          });
+        }
+      }
+    }
+    
+    return ratings;
+  }
 }

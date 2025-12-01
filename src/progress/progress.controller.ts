@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Body,
   UseGuards,
   Request,
 } from '@nestjs/common';
@@ -20,11 +21,14 @@ export class ProgressController {
     @Request() req,
     @Param('moduleId') moduleId: string,
     @Param('lessonNumber') lessonNumber: string,
+    @Body() body: { moodRating?: number; usefulnessRating?: number },
   ) {
     return this.progressService.completeLesson(
       String(req.user._id),
       moduleId,
       parseInt(lessonNumber),
+      body.moodRating,
+      body.usefulnessRating,
     );
   }
 

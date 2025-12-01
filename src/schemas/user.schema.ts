@@ -65,7 +65,9 @@ export class User {
     type: [{ 
       moduleId: { type: String, required: true },
       lessonNumber: { type: Number, required: true },
-      completedAt: { type: Date, default: Date.now }
+      completedAt: { type: Date, default: Date.now },
+      moodRating: { type: Number, min: 1, max: 5 }, // 1-5 емоджі настрою
+      usefulnessRating: { type: Number, min: 1, max: 5 } // 1-5 зірок застосовності
     }], 
     default: [] 
   })
@@ -73,6 +75,8 @@ export class User {
     moduleId: string;
     lessonNumber: number;
     completedAt: Date;
+    moodRating?: number;
+    usefulnessRating?: number;
   }>;
 
   @Prop({ type: [String], default: [] })

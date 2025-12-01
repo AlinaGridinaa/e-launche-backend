@@ -10,7 +10,13 @@ export class ProgressService {
     @InjectModel(User.name) private userModel: Model<UserDocument>,
   ) {}
 
-  async completeLesson(userId: string, moduleId: string, lessonNumber: number) {
+  async completeLesson(
+    userId: string, 
+    moduleId: string, 
+    lessonNumber: number,
+    moodRating?: number,
+    usefulnessRating?: number
+  ) {
     const user = await this.userModel.findById(userId).exec();
     
     if (!user) {
@@ -18,11 +24,20 @@ export class ProgressService {
     }
 
     // Перевіряємо чи урок вже завершено
-    const alreadyCompleted = user.completedLessons?.some(
+    const existingLessonIndex = user.completedLessons?.findIndex(
       (lesson) => lesson.moduleId === moduleId && lesson.lessonNumber === lessonNumber
     );
 
-    if (!alreadyCompleted) {
+    if (existingLessonIndex !== undefined && existingLessonIndex !== -1) {
+      // Якщо урок вже завершено, оновлюємо оцінки
+      if (moodRating !== undefined) {
+        user.completedLessons[existingLessonIndex].moodRating = moodRating;
+      }
+      if (usefulnessRating !== undefined) {
+        user.completedLessons[existingLessonIndex].usefulnessRating = usefulnessRating;
+      }
+    } else {
+      // Якщо урок ще не завершено, додаємо новий запис
       if (!user.completedLessons) {
         user.completedLessons = [];
       }
@@ -31,10 +46,12 @@ export class ProgressService {
         moduleId,
         lessonNumber,
         completedAt: new Date(),
+        moodRating,
+        usefulnessRating,
       });
-
-      await user.save();
     }
+
+    await user.save();
 
     return {
       success: true,
