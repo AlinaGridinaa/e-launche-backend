@@ -4,9 +4,17 @@ import { AppModule } from './app.module';
 import cookieParser from 'cookie-parser';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
+import { mkdirSync, existsSync } from 'fs';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  
+  // Створюємо папку для аватарів, якщо не існує
+  const uploadsPath = join(__dirname, '..', 'uploads', 'avatars');
+  if (!existsSync(uploadsPath)) {
+    mkdirSync(uploadsPath, { recursive: true });
+    console.log(`📁 Created uploads directory: ${uploadsPath}`);
+  }
   
   // Глобальна валідація
   app.useGlobalPipes(
