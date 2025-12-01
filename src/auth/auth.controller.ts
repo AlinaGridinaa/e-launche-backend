@@ -50,13 +50,13 @@ export class AuthController {
       };
     }
 
-    // Повертаємо користувача без пароля
+    // Повертаємо користувача без пароля в правильному форматі
     const userObject = user.toObject();
     const { password, ...userWithoutPassword } = userObject;
     
     return {
       success: true,
-      ...userWithoutPassword,
+      user: userWithoutPassword,
     };
   }
 }
