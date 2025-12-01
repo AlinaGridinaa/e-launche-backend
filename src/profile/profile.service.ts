@@ -4,6 +4,7 @@ import { Model } from 'mongoose';
 import { User, UserDocument } from '../schemas/user.schema';
 import { Module, ModuleDocument } from '../schemas/module.schema';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { getAvatarForLevel } from '../config/avatars.config';
 
 @Injectable()
 export class ProfileService {
@@ -49,8 +50,13 @@ export class ProfileService {
       rank: rank || 1,
     };
 
+    // Отримуємо правильний аватар на основі кількості пройдених модулів
+    const avatarUrl = getAvatarForLevel(modulesCompleted);
+    const userObject = user.toObject();
+    userObject.avatarUrl = avatarUrl;
+
     return {
-      user: user.toObject(),
+      user: userObject,
       stats,
     };
   }
