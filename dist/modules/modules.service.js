@@ -17,16 +17,61 @@ const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
 const module_schema_1 = require("../schemas/module.schema");
+const user_schema_1 = require("../schemas/user.schema");
 let ModulesService = class ModulesService {
     moduleModel;
-    constructor(moduleModel) {
+    userModel;
+    constructor(moduleModel, userModel) {
         this.moduleModel = moduleModel;
+        this.userModel = userModel;
     }
     async findAll() {
         return this.moduleModel.find().exec();
     }
+    async findAllWithUserProgress(userId) {
+        const modules = await this.moduleModel.find().exec();
+        const user = await this.userModel.findById(userId).exec();
+        if (!user || !user.completedLessons) {
+            return modules.map(module => ({
+                ...module.toObject(),
+                lessons: module.lessons.map(lesson => ({
+                    ...lesson,
+                    isCompleted: false,
+                })),
+            }));
+        }
+        return modules.map(module => ({
+            ...module.toObject(),
+            lessons: module.lessons.map(lesson => ({
+                ...lesson,
+                isCompleted: user.completedLessons.some(cl => cl.moduleId === module._id.toString() && cl.lessonNumber === lesson.number),
+            })),
+        }));
+    }
     async findById(id) {
         return this.moduleModel.findById(id).exec();
+    }
+    async findByIdWithUserProgress(id, userId) {
+        const module = await this.moduleModel.findById(id).exec();
+        if (!module)
+            return null;
+        const user = await this.userModel.findById(userId).exec();
+        if (!user || !user.completedLessons) {
+            return {
+                ...module.toObject(),
+                lessons: module.lessons.map(lesson => ({
+                    ...lesson,
+                    isCompleted: false,
+                })),
+            };
+        }
+        return {
+            ...module.toObject(),
+            lessons: module.lessons.map(lesson => ({
+                ...lesson,
+                isCompleted: user.completedLessons.some(cl => cl.moduleId === module._id.toString() && cl.lessonNumber === lesson.number),
+            })),
+        };
     }
     async findByNumber(number) {
         return this.moduleModel.findOne({ number }).exec();
@@ -68,6 +113,8 @@ exports.ModulesService = ModulesService;
 exports.ModulesService = ModulesService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, mongoose_1.InjectModel)(module_schema_1.Module.name)),
-    __metadata("design:paramtypes", [mongoose_2.Model])
+    __param(1, (0, mongoose_1.InjectModel)(user_schema_1.User.name)),
+    __metadata("design:paramtypes", [mongoose_2.Model,
+        mongoose_2.Model])
 ], ModulesService);
 //# sourceMappingURL=modules.service.js.map

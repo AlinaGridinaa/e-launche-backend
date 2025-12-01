@@ -2,19 +2,72 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Module, ModuleDocument } from '../schemas/module.schema';
+import { User, UserDocument } from '../schemas/user.schema';
 
 @Injectable()
 export class ModulesService {
   constructor(
     @InjectModel(Module.name) private moduleModel: Model<ModuleDocument>,
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
   ) {}
 
   async findAll(): Promise<Module[]> {
     return this.moduleModel.find().exec();
   }
 
+  async findAllWithUserProgress(userId: string): Promise<Module[]> {
+    const modules = await this.moduleModel.find().exec();
+    const user = await this.userModel.findById(userId).exec();
+
+    if (!user || !user.completedLessons) {
+      return modules.map(module => ({
+        ...module.toObject(),
+        lessons: module.lessons.map(lesson => ({
+          ...lesson,
+          isCompleted: false,
+        })),
+      })) as Module[];
+    }
+
+    return modules.map(module => ({
+      ...module.toObject(),
+      lessons: module.lessons.map(lesson => ({
+        ...lesson,
+        isCompleted: user.completedLessons.some(
+          cl => cl.moduleId === module._id.toString() && cl.lessonNumber === lesson.number
+        ),
+      })),
+    })) as Module[];
+  }
+
   async findById(id: string): Promise<Module | null> {
     return this.moduleModel.findById(id).exec();
+  }
+
+  async findByIdWithUserProgress(id: string, userId: string): Promise<Module | null> {
+    const module = await this.moduleModel.findById(id).exec();
+    if (!module) return null;
+
+    const user = await this.userModel.findById(userId).exec();
+    if (!user || !user.completedLessons) {
+      return {
+        ...module.toObject(),
+        lessons: module.lessons.map(lesson => ({
+          ...lesson,
+          isCompleted: false,
+        })),
+      } as Module;
+    }
+
+    return {
+      ...module.toObject(),
+      lessons: module.lessons.map(lesson => ({
+        ...lesson,
+        isCompleted: user.completedLessons.some(
+          cl => cl.moduleId === module._id.toString() && cl.lessonNumber === lesson.number
+        ),
+      })),
+    } as Module;
   }
 
   async findByNumber(number: number): Promise<Module | null> {

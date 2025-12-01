@@ -7,6 +7,7 @@ import {
   Body,
   Param,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { ModulesService } from './modules.service';
 import { Module } from '../schemas/module.schema';
@@ -18,13 +19,18 @@ export class ModulesController {
   constructor(private readonly modulesService: ModulesService) {}
 
   @Get()
-  async findAll(): Promise<Module[]> {
-    return this.modulesService.findAll();
+  async findAll(@Req() request: Request & { user: any }): Promise<Module[]> {
+    const userId = request.user._id.toString();
+    return this.modulesService.findAllWithUserProgress(userId);
   }
 
   @Get(':id')
-  async findById(@Param('id') id: string): Promise<Module | null> {
-    return this.modulesService.findById(id);
+  async findById(
+    @Param('id') id: string,
+    @Req() request: Request & { user: any },
+  ): Promise<Module | null> {
+    const userId = request.user._id.toString();
+    return this.modulesService.findByIdWithUserProgress(id, userId);
   }
 
   @Get('number/:number')

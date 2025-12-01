@@ -1,10 +1,14 @@
 import { Model } from 'mongoose';
 import { Module, ModuleDocument } from '../schemas/module.schema';
+import { UserDocument } from '../schemas/user.schema';
 export declare class ModulesService {
     private moduleModel;
-    constructor(moduleModel: Model<ModuleDocument>);
+    private userModel;
+    constructor(moduleModel: Model<ModuleDocument>, userModel: Model<UserDocument>);
     findAll(): Promise<Module[]>;
+    findAllWithUserProgress(userId: string): Promise<Module[]>;
     findById(id: string): Promise<Module | null>;
+    findByIdWithUserProgress(id: string, userId: string): Promise<Module | null>;
     findByNumber(number: number): Promise<Module | null>;
     create(moduleData: Partial<Module>): Promise<Module>;
     update(id: string, moduleData: Partial<Module>): Promise<Module | null>;

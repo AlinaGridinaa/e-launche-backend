@@ -21,11 +21,13 @@ let ModulesController = class ModulesController {
     constructor(modulesService) {
         this.modulesService = modulesService;
     }
-    async findAll() {
-        return this.modulesService.findAll();
+    async findAll(request) {
+        const userId = request.user._id.toString();
+        return this.modulesService.findAllWithUserProgress(userId);
     }
-    async findById(id) {
-        return this.modulesService.findById(id);
+    async findById(id, request) {
+        const userId = request.user._id.toString();
+        return this.modulesService.findByIdWithUserProgress(id, userId);
     }
     async findByNumber(number) {
         return this.modulesService.findByNumber(parseInt(number, 10));
@@ -46,15 +48,17 @@ let ModulesController = class ModulesController {
 exports.ModulesController = ModulesController;
 __decorate([
     (0, common_1.Get)(),
+    __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], ModulesController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], ModulesController.prototype, "findById", null);
 __decorate([
