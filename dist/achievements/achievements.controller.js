@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AchievementsController = void 0;
 const common_1 = require("@nestjs/common");
 const achievements_service_1 = require("./achievements.service");
+const submit_achievement_dto_1 = require("./dto/submit-achievement.dto");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 let AchievementsController = class AchievementsController {
     achievementsService;
@@ -106,7 +107,7 @@ __decorate([
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [Object, submit_achievement_dto_1.SubmitAchievementDto]),
     __metadata("design:returntype", Promise)
 ], AchievementsController.prototype, "submitAchievement", null);
 __decorate([

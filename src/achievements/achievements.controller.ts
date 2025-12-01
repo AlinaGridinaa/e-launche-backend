@@ -8,7 +8,8 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
-import { AchievementsService, SubmitAchievementDto } from './achievements.service';
+import { AchievementsService } from './achievements.service';
+import { SubmitAchievementDto } from './dto/submit-achievement.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('achievements')

@@ -1,4 +1,5 @@
-import { AchievementsService, SubmitAchievementDto } from './achievements.service';
+import { AchievementsService } from './achievements.service';
+import { SubmitAchievementDto } from './dto/submit-achievement.dto';
 export declare class AchievementsController {
     private readonly achievementsService;
     constructor(achievementsService: AchievementsService);
