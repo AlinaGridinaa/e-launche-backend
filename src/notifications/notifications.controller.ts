@@ -10,6 +10,14 @@ export class NotificationsController {
   // Отримати публічний VAPID ключ
   @Get('vapid-public-key')
   getVapidPublicKey() {
+    console.log('📡 VAPID public key requested');
+    console.log('   Public key:', vapidKeys.publicKey ? vapidKeys.publicKey.substring(0, 20) + '...' : 'UNDEFINED');
+    
+    if (!vapidKeys.publicKey) {
+      console.error('❌ VAPID public key is not configured!');
+      throw new Error('VAPID public key is not configured. Please set VAPID_PUBLIC_KEY environment variable.');
+    }
+    
     return { publicKey: vapidKeys.publicKey };
   }
 
