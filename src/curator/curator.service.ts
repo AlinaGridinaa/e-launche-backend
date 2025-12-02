@@ -4,6 +4,7 @@ import { Model } from 'mongoose';
 import { Homework, HomeworkDocument } from '../schemas/homework.schema';
 import { User, UserDocument } from '../schemas/user.schema';
 import { Module as ModuleEntity, ModuleDocument } from '../schemas/module.schema';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class CuratorService {
@@ -11,6 +12,7 @@ export class CuratorService {
     @InjectModel(Homework.name) private homeworkModel: Model<HomeworkDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     @InjectModel(ModuleEntity.name) private moduleModel: Model<ModuleDocument>,
+    private notificationsService: NotificationsService,
   ) {}
 
   // Отримати всі домашні завдання для куратора
@@ -70,6 +72,12 @@ export class CuratorService {
       throw new ForbiddenException('Це не ваш студент');
     }
 
+    // Отримати інформацію про модуль для нотифікації
+    const module = await this.moduleModel.findById(homework.moduleId);
+    const lessonTitle = module 
+      ? `${module.title} - Урок ${homework.lessonNumber}`
+      : `Урок ${homework.lessonNumber}`;
+
     homework.curatorId = curatorId;
     homework.score = score;
     homework.feedback = feedback;
@@ -77,6 +85,23 @@ export class CuratorService {
     homework.reviewedAt = new Date();
 
     await homework.save();
+
+    // Відправити пуш-нотифікацію студенту
+    try {
+      await this.notificationsService.sendNotificationToUser(homework.userId, {
+        title: '✅ Домашнє завдання перевірено',
+        body: `${lessonTitle}: оцінка ${score}/100`,
+        icon: '/icons/icon-192.png',
+        badge: '/icons/icon-192.png',
+        data: { 
+          url: `/modules/${homework.moduleId}/lessons/${homework.lessonNumber}`,
+          homeworkId: homework._id.toString(),
+        },
+      });
+    } catch (error) {
+      console.error('Failed to send notification:', error);
+      // Не кидаємо помилку, щоб перевірка ДЗ пройшла успішно навіть якщо нотифікація не відправилася
+    }
 
     return {
       id: homework._id,
@@ -104,6 +129,12 @@ export class CuratorService {
       throw new ForbiddenException('Це не ваш студент');
     }
 
+    // Отримати інформацію про модуль для нотифікації
+    const module = await this.moduleModel.findById(homework.moduleId);
+    const lessonTitle = module 
+      ? `${module.title} - Урок ${homework.lessonNumber}`
+      : `Урок ${homework.lessonNumber}`;
+
     homework.curatorId = curatorId;
     homework.feedback = feedback;
     homework.status = 'needs_revision';
@@ -111,6 +142,23 @@ export class CuratorService {
     homework.score = undefined; // Скидаємо оцінку
 
     await homework.save();
+
+    // Відправити пуш-нотифікацію студенту
+    try {
+      await this.notificationsService.sendNotificationToUser(homework.userId, {
+        title: '📝 Домашнє завдання потребує доопрацювання',
+        body: `${lessonTitle}: ${feedback.substring(0, 80)}${feedback.length > 80 ? '...' : ''}`,
+        icon: '/icons/icon-192.png',
+        badge: '/icons/icon-192.png',
+        data: { 
+          url: `/modules/${homework.moduleId}/lessons/${homework.lessonNumber}`,
+          homeworkId: homework._id.toString(),
+        },
+      });
+    } catch (error) {
+      console.error('Failed to send notification:', error);
+      // Не кидаємо помилку, щоб повернення ДЗ пройшло успішно навіть якщо нотифікація не відправилася
+    }
 
     return {
       id: homework._id,
