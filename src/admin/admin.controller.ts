@@ -251,4 +251,23 @@ export class AdminController {
   async getLessonRatings(@Param('moduleId') moduleId?: string) {
     return this.adminService.getLessonRatingsStatistics(moduleId);
   }
+
+  @Post('send-notification')
+  async sendCustomNotification(
+    @Body() body: {
+      title: string;
+      message: string;
+      url?: string;
+      sendToAll: boolean;
+      userIds?: string[];
+    }
+  ) {
+    return this.adminService.sendCustomNotification(
+      body.title,
+      body.message,
+      body.url,
+      body.sendToAll,
+      body.userIds
+    );
+  }
 }

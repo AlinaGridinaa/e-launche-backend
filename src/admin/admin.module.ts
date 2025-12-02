@@ -5,6 +5,7 @@ import { AdminService } from './admin.service';
 import { User, UserSchema } from '../schemas/user.schema';
 import { Module as ModuleEntity, ModuleSchema } from '../schemas/module.schema';
 import { AvatarLevel, AvatarLevelSchema } from '../schemas/avatar-level.schema';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { AvatarLevel, AvatarLevelSchema } from '../schemas/avatar-level.schema';
       { name: ModuleEntity.name, schema: ModuleSchema },
       { name: AvatarLevel.name, schema: AvatarLevelSchema },
     ]),
+    NotificationsModule,
   ],
   controllers: [AdminController],
   providers: [AdminService],

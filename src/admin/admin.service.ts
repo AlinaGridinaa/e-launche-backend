@@ -9,6 +9,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { AwardAchievementDto } from './dto/award-achievement.dto';
 import { getAvatarForLevel, setAvatarCache, clearAvatarCache } from '../config/avatars.config';
 import { uploadToCloudinary } from '../config/cloudinary.config';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class AdminService {
@@ -16,6 +17,7 @@ export class AdminService {
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     @InjectModel(Module.name) private moduleModel: Model<ModuleDocument>,
     @InjectModel(AvatarLevel.name) private avatarLevelModel: Model<AvatarLevelDocument>,
+    private notificationsService: NotificationsService,
   ) {
     // Завантажуємо аватари в кеш при старті
     this.loadAvatarsToCache();
@@ -620,5 +622,46 @@ export class AdminService {
     }
     
     return ratings;
+  }
+
+  async sendCustomNotification(
+    title: string,
+    message: string,
+    url: string | undefined,
+    sendToAll: boolean,
+    userIds: string[] | undefined,
+  ): Promise<{ sent: number; failed: number }> {
+    const payload = {
+      title,
+      body: message,
+      icon: '/icons/icon-192.png',
+      badge: '/icons/icon-192.png',
+      data: url ? { url } : undefined,
+    };
+
+    if (sendToAll) {
+      // Відправити всім користувачам
+      const result = await this.notificationsService.sendNotificationToAll(payload);
+      return { sent: result.sent, failed: result.failed };
+    } else if (userIds && userIds.length > 0) {
+      // Відправити вибраним користувачам
+      let totalSent = 0;
+      let totalFailed = 0;
+
+      for (const userId of userIds) {
+        try {
+          const result = await this.notificationsService.sendNotificationToUser(userId, payload);
+          totalSent += result.sent;
+          totalFailed += result.failed;
+        } catch (error) {
+          console.error(`Failed to send notification to user ${userId}:`, error);
+          totalFailed++;
+        }
+      }
+
+      return { sent: totalSent, failed: totalFailed };
+    } else {
+      throw new Error('Потрібно вказати або sendToAll=true, або список userIds');
+    }
   }
 }
