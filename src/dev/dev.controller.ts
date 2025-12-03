@@ -464,4 +464,509 @@ export class DevController {
 
     return materials;
   }
+
+  @Post('seed-curators')
+  @HttpCode(HttpStatus.OK)
+  async seedCurators() {
+    try {
+      const csvPath = path.join(process.cwd(), 'куратори.csv');
+      const csvContent = fs.readFileSync(csvPath, 'utf-8');
+      
+      // Парсимо CSV
+      const lines = csvContent.split('\n').filter(line => line.trim());
+      const curators: Array<{ email: string; firstName: string; lastName: string; telegram: string }> = [];
+
+      // Пропускаємо заголовок (перший рядок)
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i];
+        const columns = line.split(',');
+
+        if (columns.length < 4) continue;
+
+        const fullName = columns[0]?.trim();
+        const telegram = columns[1]?.trim();
+        const email = columns[2]?.trim();
+        const password = columns[3]?.trim();
+
+        if (!fullName || !email || !password) continue;
+
+        // Розділяємо ім'я та прізвище
+        const nameParts = fullName.split(' ');
+        const firstName = nameParts[0] || 'Куратор';
+        const lastName = nameParts.slice(1).join(' ') || '';
+
+        // Перевіряємо чи існує куратор
+        const existingCurator = await this.userModel.findOne({ email });
+        if (existingCurator) {
+          console.log(`⚠️ Curator ${email} already exists, skipping...`);
+          continue;
+        }
+
+        // Створюємо куратора
+        const curator = await this.userModel.create({
+          email,
+          password: await bcrypt.hash(password, 10),
+          firstName,
+          lastName,
+          phoneOrTelegram: telegram || null,
+          isCurator: true,
+          hasCompletedSorting: true,
+          hasAcceptedRules: true,
+          currentAvatarLevel: 0,
+          avatarUrl: getAvatarForLevel(0),
+        });
+
+        curators.push({
+          email,
+          firstName,
+          lastName,
+          telegram,
+        });
+
+        console.log(`✅ Created curator: ${firstName} ${lastName} (${email})`);
+      }
+
+      return {
+        success: true,
+        message: `Created ${curators.length} curators`,
+        curators,
+      };
+    } catch (error) {
+      console.error('❌ Error seeding curators:', error);
+      return {
+        success: false,
+        error: error.message,
+        stack: error.stack,
+      };
+    }
+  }
+
+  @Post('seed-legends')
+  @HttpCode(HttpStatus.OK)
+  async seedLegends() {
+    try {
+      const csvPath = path.join(process.cwd(), 'легенди.csv');
+      const csvContent = fs.readFileSync(csvPath, 'utf-8');
+      
+      // Парсимо CSV (складніший формат з комами всередині полів)
+      const rows = this.parseComplexCSV(csvContent);
+      const students: Array<{ email: string; firstName: string; lastName: string; telegram: string }> = [];
+      let skipped = 0;
+
+      // Пропускаємо заголовок (перший рядок)
+      for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+
+        // Пропускаємо порожні рядки
+        if (!row || row.every(cell => !cell || !cell.trim())) {
+          continue;
+        }
+
+        // Отримуємо дані з потрібних колонок
+        const fullName = row[1]?.trim(); // Колонка B: Ім'я та прізвище
+        const telegram = row[2]?.trim(); // Колонка C: Telegram
+        const email = row[3]?.trim(); // Колонка D: Логін (email)
+        const password = row[4]?.trim(); // Колонка E: Пароль
+        const curatorInfo = row[5]?.trim(); // Колонка F: Куратор і група
+        const curatorEmail = row[6]?.trim(); // Колонка G: Пошта куратора
+        const faculty = row[7]?.trim(); // Колонка H: Факультет
+        const accessType = row[8]?.trim(); // Колонка I: Доступ
+
+        // Перевіряємо обов'язкові поля
+        if (!fullName || !email || !password) {
+          console.log(`⚠️ Skipping row ${i}: missing required fields`);
+          skipped++;
+          continue;
+        }
+
+        // Ім'я та прізвище зберігаємо разом в firstName
+        const firstName = fullName || 'Студент';
+        const lastName = 'Студент'; // Порожнє прізвище (потрібне для валідації)
+
+        // Перевіряємо чи існує студент
+        const existingStudent = await this.userModel.findOne({ email });
+        if (existingStudent) {
+          console.log(`⚠️ Student ${email} already exists, skipping...`);
+          skipped++;
+          continue;
+        }
+
+        // Знаходимо куратора за email
+        let curatorId: string | null = null;
+        if (curatorEmail) {
+          const curator = await this.userModel.findOne({ 
+            email: curatorEmail,
+            isCurator: true 
+          });
+          if (curator) {
+            curatorId = curator._id.toString();
+          } else {
+            console.log(`⚠️ Curator ${curatorEmail} not found for student ${email}`);
+          }
+        }
+
+        // Визначаємо accessUntil
+        let accessUntil: Date | null = null;
+        if (accessType && accessType.includes('До')) {
+          // Парсимо дату з формату "До 31.03.2027"
+          const dateMatch = accessType.match(/До (\d{2})\.(\d{2})\.(\d{4})/);
+          if (dateMatch) {
+            const [, day, month, year] = dateMatch;
+            accessUntil = new Date(`${year}-${month}-${day}`);
+          }
+        }
+        // Якщо написано "Доступ назавжди", залишаємо null
+
+        // Мапимо факультет на правильні значення
+        let mappedFaculty = 'Продюсер'; // Default
+        if (faculty) {
+          if (faculty.includes('Експерт')) {
+            mappedFaculty = 'Експерт';
+          } else if (faculty.includes('Досвідчений')) {
+            mappedFaculty = 'Досвідчений';
+          }
+        }
+
+        // Створюємо студента з тарифом Легенда
+        const student = await this.userModel.create({
+          email,
+          password: await bcrypt.hash(password, 10),
+          firstName,
+          lastName,
+          phoneOrTelegram: telegram || null,
+          group: curatorInfo || '5 потік',
+          accessUntil,
+          tariff: 'Легенда', // Всі з цього файлу мають тариф Легенда
+          faculty: mappedFaculty,
+          curatorId,
+          hasCompletedSorting: true,
+          hasAcceptedRules: true,
+          currentAvatarLevel: 0,
+          avatarUrl: getAvatarForLevel(0),
+        });
+
+        students.push({
+          email,
+          firstName,
+          lastName,
+          telegram,
+        });
+
+        console.log(`✅ Created student: ${firstName} ${lastName} (${email}) - ${mappedFaculty} - Легенда`);
+      }
+
+      return {
+        success: true,
+        message: `Created ${students.length} students with Легенда tariff (skipped ${skipped})`,
+        students,
+      };
+    } catch (error) {
+      console.error('❌ Error seeding legends:', error);
+      return {
+        success: false,
+        error: error.message,
+        stack: error.stack,
+      };
+    }
+  }
+
+  @Post('seed-vip')
+  @HttpCode(HttpStatus.OK)
+  async seedVip() {
+    try {
+      const csvPath = path.join(process.cwd(), 'віп.csv');
+      const csvContent = fs.readFileSync(csvPath, 'utf-8');
+      
+      // Парсимо CSV (складніший формат з комами всередині полів)
+      const rows = this.parseComplexCSV(csvContent);
+      const students: Array<{ email: string; firstName: string; lastName: string; telegram: string }> = [];
+      let skipped = 0;
+
+      // Пропускаємо заголовок (перший рядок)
+      for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+
+        // Пропускаємо порожні рядки
+        if (!row || row.every(cell => !cell || !cell.trim())) {
+          continue;
+        }
+
+        // Отримуємо дані з потрібних колонок
+        const fullName = row[1]?.trim(); // Колонка B: Ім'я та прізвище
+        const telegram = row[2]?.trim(); // Колонка C: Telegram
+        const email = row[3]?.trim(); // Колонка D: Логін (email)
+        const password = row[4]?.trim(); // Колонка E: Пароль
+        const curatorInfo = row[5]?.trim(); // Колонка F: Куратор і група
+        const curatorEmail = row[6]?.trim(); // Колонка G: Пошта куратора
+        const faculty = row[7]?.trim(); // Колонка H: Факультет
+        const accessType = row[8]?.trim(); // Колонка I: Доступ
+
+        // Перевіряємо обов'язкові поля
+        if (!fullName || !email || !password) {
+          console.log(`⚠️ Skipping row ${i}: missing required fields`);
+          skipped++;
+          continue;
+        }
+
+        // Ім'я та прізвище зберігаємо разом в firstName
+        const firstName = fullName || 'Студент';
+        const lastName = 'Студент'; // Порожнє прізвище (потрібне для валідації)
+
+        // Перевіряємо чи існує студент
+        const existingStudent = await this.userModel.findOne({ email });
+        if (existingStudent) {
+          console.log(`⚠️ Student ${email} already exists, skipping...`);
+          skipped++;
+          continue;
+        }
+
+        // Знаходимо куратора за email
+        let curatorId: string | null = null;
+        if (curatorEmail) {
+          const curator = await this.userModel.findOne({ 
+            email: curatorEmail,
+            isCurator: true 
+          });
+          if (curator) {
+            curatorId = curator._id.toString();
+          } else {
+            console.log(`⚠️ Curator ${curatorEmail} not found for student ${email}`);
+          }
+        }
+
+        // Визначаємо accessUntil
+        let accessUntil: Date | null = null;
+        if (accessType && accessType.includes('До')) {
+          // Парсимо дату з формату "До 31.03.2027"
+          const dateMatch = accessType.match(/До (\d{2})\.(\d{2})\.(\d{4})/);
+          if (dateMatch) {
+            const [, day, month, year] = dateMatch;
+            accessUntil = new Date(`${year}-${month}-${day}`);
+          }
+        }
+        // Якщо написано "Доступ назавжди", залишаємо null
+
+        // Мапимо факультет на правильні значення
+        let mappedFaculty = 'Продюсер'; // Default
+        if (faculty) {
+          if (faculty.includes('Експерт')) {
+            mappedFaculty = 'Експерт';
+          } else if (faculty.includes('Досвідчений')) {
+            mappedFaculty = 'Досвідчений';
+          }
+        }
+
+        // Створюємо студента з тарифом ВІП
+        const student = await this.userModel.create({
+          email,
+          password: await bcrypt.hash(password, 10),
+          firstName,
+          lastName,
+          phoneOrTelegram: telegram || null,
+          group: curatorInfo || '5 потік',
+          accessUntil,
+          tariff: 'ВІП', // Всі з цього файлу мають тариф ВІП (доступ до 9 модулів)
+          faculty: mappedFaculty,
+          curatorId,
+          hasCompletedSorting: true,
+          hasAcceptedRules: true,
+          currentAvatarLevel: 0,
+          avatarUrl: getAvatarForLevel(0),
+        });
+
+        students.push({
+          email,
+          firstName,
+          lastName,
+          telegram,
+        });
+
+        console.log(`✅ Created student: ${firstName} ${lastName} (${email}) - ${mappedFaculty} - ВІП`);
+      }
+
+      return {
+        success: true,
+        message: `Created ${students.length} students with ВІП tariff (skipped ${skipped})`,
+        students,
+      };
+    } catch (error) {
+      console.error('❌ Error seeding VIP students:', error);
+      return {
+        success: false,
+        error: error.message,
+        stack: error.stack,
+      };
+    }
+  }
+
+  @Post('seed-premium')
+  @HttpCode(HttpStatus.OK)
+  async seedPremium() {
+    try {
+      const csvPath = path.join(process.cwd(), 'преміум.csv');
+      const csvContent = fs.readFileSync(csvPath, 'utf-8');
+      
+      // Парсимо CSV (складніший формат з комами всередині полів)
+      const rows = this.parseComplexCSV(csvContent);
+      const students: Array<{ email: string; firstName: string; lastName: string; telegram: string }> = [];
+      let skipped = 0;
+
+      // Пропускаємо заголовок (перший рядок)
+      for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+
+        // Пропускаємо порожні рядки
+        if (!row || row.every(cell => !cell || !cell.trim())) {
+          continue;
+        }
+
+        // Отримуємо дані з потрібних колонок
+        const fullName = row[1]?.trim(); // Колонка B: Ім'я та прізвище
+        const telegram = row[2]?.trim(); // Колонка C: Telegram
+        const email = row[3]?.trim(); // Колонка D: Логін (email)
+        const password = row[4]?.trim(); // Колонка E: Пароль
+        const curatorInfo = row[5]?.trim(); // Колонка F: Куратор і група
+        const curatorEmail = row[6]?.trim(); // Колонка G: Пошта куратора
+        const faculty = row[7]?.trim(); // Колонка H: Факультет
+        const accessType = row[8]?.trim(); // Колонка I: Доступ
+
+        // Перевіряємо обов'язкові поля
+        if (!fullName || !email || !password) {
+          console.log(`⚠️ Skipping row ${i}: missing required fields`);
+          skipped++;
+          continue;
+        }
+
+        // Ім'я та прізвище зберігаємо разом в firstName
+        const firstName = fullName || 'Студент';
+        const lastName = 'Студент'; // Порожнє прізвище (потрібне для валідації)
+
+        // Перевіряємо чи існує студент
+        const existingStudent = await this.userModel.findOne({ email });
+        if (existingStudent) {
+          console.log(`⚠️ Student ${email} already exists, skipping...`);
+          skipped++;
+          continue;
+        }
+
+        // Знаходимо куратора за email
+        let curatorId: string | null = null;
+        if (curatorEmail) {
+          const curator = await this.userModel.findOne({ 
+            email: curatorEmail,
+            isCurator: true 
+          });
+          if (curator) {
+            curatorId = curator._id.toString();
+          } else {
+            console.log(`⚠️ Curator ${curatorEmail} not found for student ${email}`);
+          }
+        }
+
+        // Визначаємо accessUntil
+        let accessUntil: Date | null = null;
+        if (accessType && accessType.includes('До')) {
+          // Парсимо дату з формату "До 31.03.2027" або "До 30.09.2026"
+          const dateMatch = accessType.match(/До (\d{2})\.(\d{2})\.(\d{4})/);
+          if (dateMatch) {
+            const [, day, month, year] = dateMatch;
+            accessUntil = new Date(`${year}-${month}-${day}`);
+          }
+        }
+        // Якщо написано "Доступ назавжди", залишаємо null
+
+        // Мапимо факультет на правильні значення
+        let mappedFaculty = 'Продюсер'; // Default
+        if (faculty) {
+          if (faculty.includes('Експерт')) {
+            mappedFaculty = 'Експерт';
+          } else if (faculty.includes('Досвідчений')) {
+            mappedFaculty = 'Досвідчений';
+          }
+        }
+
+        // Створюємо студента з тарифом Преміум
+        const student = await this.userModel.create({
+          email,
+          password: await bcrypt.hash(password, 10),
+          firstName,
+          lastName,
+          phoneOrTelegram: telegram || null,
+          group: curatorInfo || '5 потік',
+          accessUntil,
+          tariff: 'Преміум', // Всі з цього файлу мають тариф Преміум (доступ до 7 модулів)
+          faculty: mappedFaculty,
+          curatorId,
+          hasCompletedSorting: true,
+          hasAcceptedRules: true,
+          currentAvatarLevel: 0,
+          avatarUrl: getAvatarForLevel(0),
+        });
+
+        students.push({
+          email,
+          firstName,
+          lastName,
+          telegram,
+        });
+
+        console.log(`✅ Created student: ${firstName} ${lastName} (${email}) - ${mappedFaculty} - Преміум`);
+      }
+
+      return {
+        success: true,
+        message: `Created ${students.length} students with Преміум tariff (skipped ${skipped})`,
+        students,
+      };
+    } catch (error) {
+      console.error('❌ Error seeding Premium students:', error);
+      return {
+        success: false,
+        error: error.message,
+        stack: error.stack,
+      };
+    }
+  }
+
+  // Покращений парсер CSV який правильно обробляє коми в лапках
+  private parseComplexCSV(content: string): string[][] {
+    const rows: string[][] = [];
+    const lines = content.split('\n');
+    
+    for (const line of lines) {
+      if (!line.trim()) continue;
+      
+      const row: string[] = [];
+      let currentField = '';
+      let insideQuotes = false;
+      
+      for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        const nextChar = line[i + 1];
+        
+        if (char === '"') {
+          if (insideQuotes && nextChar === '"') {
+            // Подвійні лапки всередині поля
+            currentField += '"';
+            i++; // Skip next quote
+          } else {
+            // Початок або кінець quoted field
+            insideQuotes = !insideQuotes;
+          }
+        } else if (char === ',' && !insideQuotes) {
+          // Роздільник поля
+          row.push(currentField.trim());
+          currentField = '';
+        } else {
+          currentField += char;
+        }
+      }
+      
+      // Додаємо останнє поле
+      row.push(currentField.trim());
+      rows.push(row);
+    }
+    
+    return rows;
+  }
 }

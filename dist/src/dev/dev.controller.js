@@ -456,6 +456,406 @@ let DevController = class DevController {
         }
         return materials;
     }
+    async seedCurators() {
+        try {
+            const csvPath = path.join(process.cwd(), 'куратори.csv');
+            const csvContent = fs.readFileSync(csvPath, 'utf-8');
+            const lines = csvContent.split('\n').filter(line => line.trim());
+            const curators = [];
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i];
+                const columns = line.split(',');
+                if (columns.length < 4)
+                    continue;
+                const fullName = columns[0]?.trim();
+                const telegram = columns[1]?.trim();
+                const email = columns[2]?.trim();
+                const password = columns[3]?.trim();
+                if (!fullName || !email || !password)
+                    continue;
+                const nameParts = fullName.split(' ');
+                const firstName = nameParts[0] || 'Куратор';
+                const lastName = nameParts.slice(1).join(' ') || '';
+                const existingCurator = await this.userModel.findOne({ email });
+                if (existingCurator) {
+                    console.log(`⚠️ Curator ${email} already exists, skipping...`);
+                    continue;
+                }
+                const curator = await this.userModel.create({
+                    email,
+                    password: await bcrypt.hash(password, 10),
+                    firstName,
+                    lastName,
+                    phoneOrTelegram: telegram || null,
+                    isCurator: true,
+                    hasCompletedSorting: true,
+                    hasAcceptedRules: true,
+                    currentAvatarLevel: 0,
+                    avatarUrl: (0, avatars_config_1.getAvatarForLevel)(0),
+                });
+                curators.push({
+                    email,
+                    firstName,
+                    lastName,
+                    telegram,
+                });
+                console.log(`✅ Created curator: ${firstName} ${lastName} (${email})`);
+            }
+            return {
+                success: true,
+                message: `Created ${curators.length} curators`,
+                curators,
+            };
+        }
+        catch (error) {
+            console.error('❌ Error seeding curators:', error);
+            return {
+                success: false,
+                error: error.message,
+                stack: error.stack,
+            };
+        }
+    }
+    async seedLegends() {
+        try {
+            const csvPath = path.join(process.cwd(), 'легенди.csv');
+            const csvContent = fs.readFileSync(csvPath, 'utf-8');
+            const rows = this.parseComplexCSV(csvContent);
+            const students = [];
+            let skipped = 0;
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                if (!row || row.every(cell => !cell || !cell.trim())) {
+                    continue;
+                }
+                const fullName = row[1]?.trim();
+                const telegram = row[2]?.trim();
+                const email = row[3]?.trim();
+                const password = row[4]?.trim();
+                const curatorInfo = row[5]?.trim();
+                const curatorEmail = row[6]?.trim();
+                const faculty = row[7]?.trim();
+                const accessType = row[8]?.trim();
+                if (!fullName || !email || !password) {
+                    console.log(`⚠️ Skipping row ${i}: missing required fields`);
+                    skipped++;
+                    continue;
+                }
+                const firstName = fullName || 'Студент';
+                const lastName = 'Студент';
+                const existingStudent = await this.userModel.findOne({ email });
+                if (existingStudent) {
+                    console.log(`⚠️ Student ${email} already exists, skipping...`);
+                    skipped++;
+                    continue;
+                }
+                let curatorId = null;
+                if (curatorEmail) {
+                    const curator = await this.userModel.findOne({
+                        email: curatorEmail,
+                        isCurator: true
+                    });
+                    if (curator) {
+                        curatorId = curator._id.toString();
+                    }
+                    else {
+                        console.log(`⚠️ Curator ${curatorEmail} not found for student ${email}`);
+                    }
+                }
+                let accessUntil = null;
+                if (accessType && accessType.includes('До')) {
+                    const dateMatch = accessType.match(/До (\d{2})\.(\d{2})\.(\d{4})/);
+                    if (dateMatch) {
+                        const [, day, month, year] = dateMatch;
+                        accessUntil = new Date(`${year}-${month}-${day}`);
+                    }
+                }
+                let mappedFaculty = 'Продюсер';
+                if (faculty) {
+                    if (faculty.includes('Експерт')) {
+                        mappedFaculty = 'Експерт';
+                    }
+                    else if (faculty.includes('Досвідчений')) {
+                        mappedFaculty = 'Досвідчений';
+                    }
+                }
+                const student = await this.userModel.create({
+                    email,
+                    password: await bcrypt.hash(password, 10),
+                    firstName,
+                    lastName,
+                    phoneOrTelegram: telegram || null,
+                    group: curatorInfo || '5 потік',
+                    accessUntil,
+                    tariff: 'Легенда',
+                    faculty: mappedFaculty,
+                    curatorId,
+                    hasCompletedSorting: true,
+                    hasAcceptedRules: true,
+                    currentAvatarLevel: 0,
+                    avatarUrl: (0, avatars_config_1.getAvatarForLevel)(0),
+                });
+                students.push({
+                    email,
+                    firstName,
+                    lastName,
+                    telegram,
+                });
+                console.log(`✅ Created student: ${firstName} ${lastName} (${email}) - ${mappedFaculty} - Легенда`);
+            }
+            return {
+                success: true,
+                message: `Created ${students.length} students with Легенда tariff (skipped ${skipped})`,
+                students,
+            };
+        }
+        catch (error) {
+            console.error('❌ Error seeding legends:', error);
+            return {
+                success: false,
+                error: error.message,
+                stack: error.stack,
+            };
+        }
+    }
+    async seedVip() {
+        try {
+            const csvPath = path.join(process.cwd(), 'віп.csv');
+            const csvContent = fs.readFileSync(csvPath, 'utf-8');
+            const rows = this.parseComplexCSV(csvContent);
+            const students = [];
+            let skipped = 0;
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                if (!row || row.every(cell => !cell || !cell.trim())) {
+                    continue;
+                }
+                const fullName = row[1]?.trim();
+                const telegram = row[2]?.trim();
+                const email = row[3]?.trim();
+                const password = row[4]?.trim();
+                const curatorInfo = row[5]?.trim();
+                const curatorEmail = row[6]?.trim();
+                const faculty = row[7]?.trim();
+                const accessType = row[8]?.trim();
+                if (!fullName || !email || !password) {
+                    console.log(`⚠️ Skipping row ${i}: missing required fields`);
+                    skipped++;
+                    continue;
+                }
+                const firstName = fullName || 'Студент';
+                const lastName = 'Студент';
+                const existingStudent = await this.userModel.findOne({ email });
+                if (existingStudent) {
+                    console.log(`⚠️ Student ${email} already exists, skipping...`);
+                    skipped++;
+                    continue;
+                }
+                let curatorId = null;
+                if (curatorEmail) {
+                    const curator = await this.userModel.findOne({
+                        email: curatorEmail,
+                        isCurator: true
+                    });
+                    if (curator) {
+                        curatorId = curator._id.toString();
+                    }
+                    else {
+                        console.log(`⚠️ Curator ${curatorEmail} not found for student ${email}`);
+                    }
+                }
+                let accessUntil = null;
+                if (accessType && accessType.includes('До')) {
+                    const dateMatch = accessType.match(/До (\d{2})\.(\d{2})\.(\d{4})/);
+                    if (dateMatch) {
+                        const [, day, month, year] = dateMatch;
+                        accessUntil = new Date(`${year}-${month}-${day}`);
+                    }
+                }
+                let mappedFaculty = 'Продюсер';
+                if (faculty) {
+                    if (faculty.includes('Експерт')) {
+                        mappedFaculty = 'Експерт';
+                    }
+                    else if (faculty.includes('Досвідчений')) {
+                        mappedFaculty = 'Досвідчений';
+                    }
+                }
+                const student = await this.userModel.create({
+                    email,
+                    password: await bcrypt.hash(password, 10),
+                    firstName,
+                    lastName,
+                    phoneOrTelegram: telegram || null,
+                    group: curatorInfo || '5 потік',
+                    accessUntil,
+                    tariff: 'ВІП',
+                    faculty: mappedFaculty,
+                    curatorId,
+                    hasCompletedSorting: true,
+                    hasAcceptedRules: true,
+                    currentAvatarLevel: 0,
+                    avatarUrl: (0, avatars_config_1.getAvatarForLevel)(0),
+                });
+                students.push({
+                    email,
+                    firstName,
+                    lastName,
+                    telegram,
+                });
+                console.log(`✅ Created student: ${firstName} ${lastName} (${email}) - ${mappedFaculty} - ВІП`);
+            }
+            return {
+                success: true,
+                message: `Created ${students.length} students with ВІП tariff (skipped ${skipped})`,
+                students,
+            };
+        }
+        catch (error) {
+            console.error('❌ Error seeding VIP students:', error);
+            return {
+                success: false,
+                error: error.message,
+                stack: error.stack,
+            };
+        }
+    }
+    async seedPremium() {
+        try {
+            const csvPath = path.join(process.cwd(), 'преміум.csv');
+            const csvContent = fs.readFileSync(csvPath, 'utf-8');
+            const rows = this.parseComplexCSV(csvContent);
+            const students = [];
+            let skipped = 0;
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                if (!row || row.every(cell => !cell || !cell.trim())) {
+                    continue;
+                }
+                const fullName = row[1]?.trim();
+                const telegram = row[2]?.trim();
+                const email = row[3]?.trim();
+                const password = row[4]?.trim();
+                const curatorInfo = row[5]?.trim();
+                const curatorEmail = row[6]?.trim();
+                const faculty = row[7]?.trim();
+                const accessType = row[8]?.trim();
+                if (!fullName || !email || !password) {
+                    console.log(`⚠️ Skipping row ${i}: missing required fields`);
+                    skipped++;
+                    continue;
+                }
+                const firstName = fullName || 'Студент';
+                const lastName = 'Студент';
+                const existingStudent = await this.userModel.findOne({ email });
+                if (existingStudent) {
+                    console.log(`⚠️ Student ${email} already exists, skipping...`);
+                    skipped++;
+                    continue;
+                }
+                let curatorId = null;
+                if (curatorEmail) {
+                    const curator = await this.userModel.findOne({
+                        email: curatorEmail,
+                        isCurator: true
+                    });
+                    if (curator) {
+                        curatorId = curator._id.toString();
+                    }
+                    else {
+                        console.log(`⚠️ Curator ${curatorEmail} not found for student ${email}`);
+                    }
+                }
+                let accessUntil = null;
+                if (accessType && accessType.includes('До')) {
+                    const dateMatch = accessType.match(/До (\d{2})\.(\d{2})\.(\d{4})/);
+                    if (dateMatch) {
+                        const [, day, month, year] = dateMatch;
+                        accessUntil = new Date(`${year}-${month}-${day}`);
+                    }
+                }
+                let mappedFaculty = 'Продюсер';
+                if (faculty) {
+                    if (faculty.includes('Експерт')) {
+                        mappedFaculty = 'Експерт';
+                    }
+                    else if (faculty.includes('Досвідчений')) {
+                        mappedFaculty = 'Досвідчений';
+                    }
+                }
+                const student = await this.userModel.create({
+                    email,
+                    password: await bcrypt.hash(password, 10),
+                    firstName,
+                    lastName,
+                    phoneOrTelegram: telegram || null,
+                    group: curatorInfo || '5 потік',
+                    accessUntil,
+                    tariff: 'Преміум',
+                    faculty: mappedFaculty,
+                    curatorId,
+                    hasCompletedSorting: true,
+                    hasAcceptedRules: true,
+                    currentAvatarLevel: 0,
+                    avatarUrl: (0, avatars_config_1.getAvatarForLevel)(0),
+                });
+                students.push({
+                    email,
+                    firstName,
+                    lastName,
+                    telegram,
+                });
+                console.log(`✅ Created student: ${firstName} ${lastName} (${email}) - ${mappedFaculty} - Преміум`);
+            }
+            return {
+                success: true,
+                message: `Created ${students.length} students with Преміум tariff (skipped ${skipped})`,
+                students,
+            };
+        }
+        catch (error) {
+            console.error('❌ Error seeding Premium students:', error);
+            return {
+                success: false,
+                error: error.message,
+                stack: error.stack,
+            };
+        }
+    }
+    parseComplexCSV(content) {
+        const rows = [];
+        const lines = content.split('\n');
+        for (const line of lines) {
+            if (!line.trim())
+                continue;
+            const row = [];
+            let currentField = '';
+            let insideQuotes = false;
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                const nextChar = line[i + 1];
+                if (char === '"') {
+                    if (insideQuotes && nextChar === '"') {
+                        currentField += '"';
+                        i++;
+                    }
+                    else {
+                        insideQuotes = !insideQuotes;
+                    }
+                }
+                else if (char === ',' && !insideQuotes) {
+                    row.push(currentField.trim());
+                    currentField = '';
+                }
+                else {
+                    currentField += char;
+                }
+            }
+            row.push(currentField.trim());
+            rows.push(row);
+        }
+        return rows;
+    }
 };
 exports.DevController = DevController;
 __decorate([
@@ -493,6 +893,34 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], DevController.prototype, "seedModules", null);
+__decorate([
+    (0, common_1.Post)('seed-curators'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], DevController.prototype, "seedCurators", null);
+__decorate([
+    (0, common_1.Post)('seed-legends'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], DevController.prototype, "seedLegends", null);
+__decorate([
+    (0, common_1.Post)('seed-vip'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], DevController.prototype, "seedVip", null);
+__decorate([
+    (0, common_1.Post)('seed-premium'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], DevController.prototype, "seedPremium", null);
 exports.DevController = DevController = __decorate([
     (0, common_1.Controller)('dev'),
     __param(0, (0, mongoose_1.InjectModel)(user_schema_1.User.name)),

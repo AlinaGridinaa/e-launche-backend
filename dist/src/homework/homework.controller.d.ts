@@ -21,7 +21,7 @@ export declare class HomeworkController {
         lessonNumber: number;
         answer: string;
         attachments: string[];
-        status: "pending" | "reviewed" | "approved" | "needs_revision";
+        status: "approved" | "needs_revision" | "pending" | "reviewed";
         score: number | undefined;
         feedback: string | undefined;
         submittedAt: Date;

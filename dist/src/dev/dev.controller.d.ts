@@ -139,4 +139,77 @@ export declare class DevController {
     private parseCSV;
     private parseCSVLine;
     private parseMaterials;
+    seedCurators(): Promise<{
+        success: boolean;
+        message: string;
+        curators: {
+            email: string;
+            firstName: string;
+            lastName: string;
+            telegram: string;
+        }[];
+        error?: undefined;
+        stack?: undefined;
+    } | {
+        success: boolean;
+        error: any;
+        stack: any;
+        message?: undefined;
+        curators?: undefined;
+    }>;
+    seedLegends(): Promise<{
+        success: boolean;
+        message: string;
+        students: {
+            email: string;
+            firstName: string;
+            lastName: string;
+            telegram: string;
+        }[];
+        error?: undefined;
+        stack?: undefined;
+    } | {
+        success: boolean;
+        error: any;
+        stack: any;
+        message?: undefined;
+        students?: undefined;
+    }>;
+    seedVip(): Promise<{
+        success: boolean;
+        message: string;
+        students: {
+            email: string;
+            firstName: string;
+            lastName: string;
+            telegram: string;
+        }[];
+        error?: undefined;
+        stack?: undefined;
+    } | {
+        success: boolean;
+        error: any;
+        stack: any;
+        message?: undefined;
+        students?: undefined;
+    }>;
+    seedPremium(): Promise<{
+        success: boolean;
+        message: string;
+        students: {
+            email: string;
+            firstName: string;
+            lastName: string;
+            telegram: string;
+        }[];
+        error?: undefined;
+        stack?: undefined;
+    } | {
+        success: boolean;
+        error: any;
+        stack: any;
+        message?: undefined;
+        students?: undefined;
+    }>;
+    private parseComplexCSV;
 }
