@@ -8,8 +8,14 @@ const common_1 = require("@nestjs/common");
 const app_module_1 = require("./app.module");
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const path_1 = require("path");
+const fs_1 = require("fs");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
+    const uploadsPath = (0, path_1.join)(__dirname, '..', 'uploads', 'avatars');
+    if (!(0, fs_1.existsSync)(uploadsPath)) {
+        (0, fs_1.mkdirSync)(uploadsPath, { recursive: true });
+        console.log(`📁 Created uploads directory: ${uploadsPath}`);
+    }
     app.useGlobalPipes(new common_1.ValidationPipe({
         whitelist: true,
         forbidNonWhitelisted: true,

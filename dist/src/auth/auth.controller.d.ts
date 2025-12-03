@@ -10,7 +10,10 @@ export declare class AuthController {
             email: string;
             firstName: string;
             lastName: string;
-            phone?: string;
+            phoneOrTelegram?: string;
+            group?: string;
+            accessUntil?: Date;
+            tariff?: string;
             avatarUrl?: string;
             currentAvatarLevel: number;
             faculty?: string;
@@ -29,6 +32,8 @@ export declare class AuthController {
                 moduleId: string;
                 lessonNumber: number;
                 completedAt: Date;
+                moodRating?: number;
+                usefulnessRating?: number;
             }>;
             completedModules: string[];
             earnings: number;
@@ -77,7 +82,10 @@ export declare class AuthController {
             email: string;
             firstName: string;
             lastName: string;
-            phone?: string;
+            phoneOrTelegram?: string;
+            group?: string;
+            accessUntil?: Date;
+            tariff?: string;
             avatarUrl?: string;
             currentAvatarLevel: number;
             faculty?: string;
@@ -96,6 +104,8 @@ export declare class AuthController {
                 moduleId: string;
                 lessonNumber: number;
                 completedAt: Date;
+                moodRating?: number;
+                usefulnessRating?: number;
             }>;
             completedModules: string[];
             earnings: number;

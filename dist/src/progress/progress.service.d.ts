@@ -3,7 +3,7 @@ import { UserDocument } from '../schemas/user.schema';
 export declare class ProgressService {
     private userModel;
     constructor(userModel: Model<UserDocument>);
-    completeLesson(userId: string, moduleId: string, lessonNumber: number): Promise<{
+    completeLesson(userId: string, moduleId: string, lessonNumber: number, moodRating?: number, usefulnessRating?: number): Promise<{
         success: boolean;
         message: string;
         completedLessons: number;

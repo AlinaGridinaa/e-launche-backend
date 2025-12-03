@@ -18,7 +18,16 @@ export class User {
   lastName: string;
 
   @Prop()
-  phone?: string;
+  phoneOrTelegram?: string; // Номер телефону або телеграм
+
+  @Prop()
+  group?: string; // Група студента (наприклад "5 потік")
+
+  @Prop()
+  accessUntil?: Date; // Доступ до якої дати (якщо null - назавжди)
+
+  @Prop({ type: String, enum: ['Преміум', 'ВІП', 'Легенда'], default: null })
+  tariff?: string; // Тариф: Преміум (7 модулів), ВІП (9 модулів), Легенда (10 модулів)
 
   @Prop()
   avatarUrl?: string;

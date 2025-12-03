@@ -16,7 +16,10 @@ let User = class User {
     password;
     firstName;
     lastName;
-    phone;
+    phoneOrTelegram;
+    group;
+    accessUntil;
+    tariff;
     avatarUrl;
     currentAvatarLevel;
     faculty;
@@ -53,7 +56,19 @@ __decorate([
 __decorate([
     (0, mongoose_1.Prop)(),
     __metadata("design:type", String)
-], User.prototype, "phone", void 0);
+], User.prototype, "phoneOrTelegram", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], User.prototype, "group", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", Date)
+], User.prototype, "accessUntil", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: String, enum: ['Преміум', 'ВІП', 'Легенда'], default: null }),
+    __metadata("design:type", String)
+], User.prototype, "tariff", void 0);
 __decorate([
     (0, mongoose_1.Prop)(),
     __metadata("design:type", String)
@@ -106,7 +121,9 @@ __decorate([
         type: [{
                 moduleId: { type: String, required: true },
                 lessonNumber: { type: Number, required: true },
-                completedAt: { type: Date, default: Date.now }
+                completedAt: { type: Date, default: Date.now },
+                moodRating: { type: Number, min: 1, max: 5 },
+                usefulnessRating: { type: Number, min: 1, max: 5 }
             }],
         default: []
     }),

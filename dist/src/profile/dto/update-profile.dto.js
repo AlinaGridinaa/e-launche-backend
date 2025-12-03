@@ -15,7 +15,7 @@ class UpdateProfileDto {
     firstName;
     lastName;
     email;
-    phone;
+    phoneOrTelegram;
     faculty;
     hasSeenWelcomeModal;
 }
@@ -39,7 +39,7 @@ __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
-], UpdateProfileDto.prototype, "phone", void 0);
+], UpdateProfileDto.prototype, "phoneOrTelegram", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),

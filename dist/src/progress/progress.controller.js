@@ -21,8 +21,8 @@ let ProgressController = class ProgressController {
     constructor(progressService) {
         this.progressService = progressService;
     }
-    async completeLesson(req, moduleId, lessonNumber) {
-        return this.progressService.completeLesson(String(req.user._id), moduleId, parseInt(lessonNumber));
+    async completeLesson(req, moduleId, lessonNumber, body) {
+        return this.progressService.completeLesson(String(req.user._id), moduleId, parseInt(lessonNumber), body.moodRating, body.usefulnessRating);
     }
     async uncompleteLesson(req, moduleId, lessonNumber) {
         return this.progressService.uncompleteLesson(String(req.user._id), moduleId, parseInt(lessonNumber));
@@ -41,8 +41,9 @@ __decorate([
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Param)('moduleId')),
     __param(2, (0, common_1.Param)('lessonNumber')),
+    __param(3, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String, String]),
+    __metadata("design:paramtypes", [Object, String, String, Object]),
     __metadata("design:returntype", Promise)
 ], ProgressController.prototype, "completeLesson", null);
 __decorate([

@@ -10,10 +10,17 @@ export declare class DevController {
     seed(): Promise<{
         success: boolean;
         message: string;
-        users: {
+        users: ({
             email: string;
             password: string;
-        }[];
+            role: string;
+            faculty?: undefined;
+        } | {
+            email: string;
+            password: string;
+            role: string;
+            faculty: string | undefined;
+        })[];
         error?: undefined;
     } | {
         success: boolean;

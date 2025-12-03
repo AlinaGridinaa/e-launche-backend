@@ -14,6 +14,7 @@ const curator_service_1 = require("./curator.service");
 const homework_schema_1 = require("../schemas/homework.schema");
 const user_schema_1 = require("../schemas/user.schema");
 const module_schema_1 = require("../schemas/module.schema");
+const notifications_module_1 = require("../notifications/notifications.module");
 let CuratorModule = class CuratorModule {
 };
 exports.CuratorModule = CuratorModule;
@@ -25,6 +26,7 @@ exports.CuratorModule = CuratorModule = __decorate([
                 { name: user_schema_1.User.name, schema: user_schema_1.UserSchema },
                 { name: module_schema_1.Module.name, schema: module_schema_1.ModuleSchema },
             ]),
+            notifications_module_1.NotificationsModule,
         ],
         controllers: [curator_controller_1.CuratorController],
         providers: [curator_service_1.CuratorService],

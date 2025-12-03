@@ -23,13 +23,21 @@ let ProgressService = class ProgressService {
     constructor(userModel) {
         this.userModel = userModel;
     }
-    async completeLesson(userId, moduleId, lessonNumber) {
+    async completeLesson(userId, moduleId, lessonNumber, moodRating, usefulnessRating) {
         const user = await this.userModel.findById(userId).exec();
         if (!user) {
             throw new common_1.NotFoundException('Користувача не знайдено');
         }
-        const alreadyCompleted = user.completedLessons?.some((lesson) => lesson.moduleId === moduleId && lesson.lessonNumber === lessonNumber);
-        if (!alreadyCompleted) {
+        const existingLessonIndex = user.completedLessons?.findIndex((lesson) => lesson.moduleId === moduleId && lesson.lessonNumber === lessonNumber);
+        if (existingLessonIndex !== undefined && existingLessonIndex !== -1) {
+            if (moodRating !== undefined) {
+                user.completedLessons[existingLessonIndex].moodRating = moodRating;
+            }
+            if (usefulnessRating !== undefined) {
+                user.completedLessons[existingLessonIndex].usefulnessRating = usefulnessRating;
+            }
+        }
+        else {
             if (!user.completedLessons) {
                 user.completedLessons = [];
             }
@@ -37,9 +45,11 @@ let ProgressService = class ProgressService {
                 moduleId,
                 lessonNumber,
                 completedAt: new Date(),
+                moodRating,
+                usefulnessRating,
             });
-            await user.save();
         }
+        await user.save();
         return {
             success: true,
             message: 'Урок позначено як завершений',

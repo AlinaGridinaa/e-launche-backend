@@ -11,6 +11,22 @@ export class ModulesService {
     @InjectModel(User.name) private userModel: Model<UserDocument>,
   ) {}
 
+  // Функція для отримання максимальної кількості модулів за тарифом
+  private getMaxModulesByTariff(tariff?: string): number {
+    if (!tariff) return 10; // Без тарифу - доступ до всіх модулів (для адмінів/кураторів)
+    
+    switch (tariff) {
+      case 'Преміум':
+        return 7;
+      case 'ВІП':
+        return 9;
+      case 'Легенда':
+        return 10;
+      default:
+        return 10;
+    }
+  }
+
   async findAll(): Promise<Module[]> {
     return this.moduleModel.find().exec();
   }
@@ -19,7 +35,7 @@ export class ModulesService {
     const modules = await this.moduleModel.find().lean().exec();
     const user = await this.userModel.findById(userId).exec();
 
-    if (!user || !user.completedLessons) {
+    if (!user) {
       return modules.map(module => ({
         ...module,
         lessons: module.lessons.map(lesson => ({
@@ -29,15 +45,24 @@ export class ModulesService {
       })) as Module[];
     }
 
-    return modules.map(module => ({
-      ...module,
-      lessons: module.lessons.map(lesson => ({
-        ...lesson,
-        isCompleted: user.completedLessons.some(
-          cl => cl.moduleId.toString() === module._id.toString() && cl.lessonNumber === lesson.number
-        ),
-      })),
-    })) as Module[];
+    // Отримуємо максимальну кількість модулів за тарифом
+    const maxModules = this.getMaxModulesByTariff(user.tariff);
+
+    return modules.map(module => {
+      // Перевіряємо чи доступний модуль за тарифом (адміни та куратори мають доступ до всіх)
+      const isTariffLocked = !user.isAdmin && !user.isCurator && module.number > maxModules;
+
+      return {
+        ...module,
+        isLocked: module.isLocked || isTariffLocked, // Модуль заблокований якщо або вручну заблокований, або за тарифом
+        lessons: module.lessons.map(lesson => ({
+          ...lesson,
+          isCompleted: user.completedLessons?.some(
+            cl => cl.moduleId.toString() === module._id.toString() && cl.lessonNumber === lesson.number
+          ) || false,
+        })),
+      };
+    }) as Module[];
   }
 
   async findById(id: string): Promise<Module | null> {
@@ -50,7 +75,7 @@ export class ModulesService {
 
     const user = await this.userModel.findById(userId).exec();
     
-    if (!user || !user.completedLessons) {
+    if (!user) {
       return {
         ...module,
         lessons: module.lessons.map(lesson => ({
@@ -60,13 +85,18 @@ export class ModulesService {
       } as Module;
     }
 
+    // Перевіряємо доступ за тарифом
+    const maxModules = this.getMaxModulesByTariff(user.tariff);
+    const isTariffLocked = !user.isAdmin && !user.isCurator && module.number > maxModules;
+
     return {
       ...module,
+      isLocked: module.isLocked || isTariffLocked,
       lessons: module.lessons.map(lesson => ({
         ...lesson,
-        isCompleted: user.completedLessons.some(
+        isCompleted: user.completedLessons?.some(
           cl => cl.moduleId.toString() === module._id.toString() && cl.lessonNumber === lesson.number
-        ),
+        ) || false,
       })),
     } as Module;
   }

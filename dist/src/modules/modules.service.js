@@ -25,13 +25,27 @@ let ModulesService = class ModulesService {
         this.moduleModel = moduleModel;
         this.userModel = userModel;
     }
+    getMaxModulesByTariff(tariff) {
+        if (!tariff)
+            return 10;
+        switch (tariff) {
+            case 'Преміум':
+                return 7;
+            case 'ВІП':
+                return 9;
+            case 'Легенда':
+                return 10;
+            default:
+                return 10;
+        }
+    }
     async findAll() {
         return this.moduleModel.find().exec();
     }
     async findAllWithUserProgress(userId) {
         const modules = await this.moduleModel.find().lean().exec();
         const user = await this.userModel.findById(userId).exec();
-        if (!user || !user.completedLessons) {
+        if (!user) {
             return modules.map(module => ({
                 ...module,
                 lessons: module.lessons.map(lesson => ({
@@ -40,13 +54,18 @@ let ModulesService = class ModulesService {
                 })),
             }));
         }
-        return modules.map(module => ({
-            ...module,
-            lessons: module.lessons.map(lesson => ({
-                ...lesson,
-                isCompleted: user.completedLessons.some(cl => cl.moduleId.toString() === module._id.toString() && cl.lessonNumber === lesson.number),
-            })),
-        }));
+        const maxModules = this.getMaxModulesByTariff(user.tariff);
+        return modules.map(module => {
+            const isTariffLocked = !user.isAdmin && !user.isCurator && module.number > maxModules;
+            return {
+                ...module,
+                isLocked: module.isLocked || isTariffLocked,
+                lessons: module.lessons.map(lesson => ({
+                    ...lesson,
+                    isCompleted: user.completedLessons?.some(cl => cl.moduleId.toString() === module._id.toString() && cl.lessonNumber === lesson.number) || false,
+                })),
+            };
+        });
     }
     async findById(id) {
         return this.moduleModel.findById(id).exec();
@@ -56,7 +75,7 @@ let ModulesService = class ModulesService {
         if (!module)
             return null;
         const user = await this.userModel.findById(userId).exec();
-        if (!user || !user.completedLessons) {
+        if (!user) {
             return {
                 ...module,
                 lessons: module.lessons.map(lesson => ({
@@ -65,11 +84,14 @@ let ModulesService = class ModulesService {
                 })),
             };
         }
+        const maxModules = this.getMaxModulesByTariff(user.tariff);
+        const isTariffLocked = !user.isAdmin && !user.isCurator && module.number > maxModules;
         return {
             ...module,
+            isLocked: module.isLocked || isTariffLocked,
             lessons: module.lessons.map(lesson => ({
                 ...lesson,
-                isCompleted: user.completedLessons.some(cl => cl.moduleId.toString() === module._id.toString() && cl.lessonNumber === lesson.number),
+                isCompleted: user.completedLessons?.some(cl => cl.moduleId.toString() === module._id.toString() && cl.lessonNumber === lesson.number) || false,
             })),
         };
     }

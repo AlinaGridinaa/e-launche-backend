@@ -14,6 +14,7 @@ const admin_service_1 = require("./admin.service");
 const user_schema_1 = require("../schemas/user.schema");
 const module_schema_1 = require("../schemas/module.schema");
 const avatar_level_schema_1 = require("../schemas/avatar-level.schema");
+const notifications_module_1 = require("../notifications/notifications.module");
 let AdminModule = class AdminModule {
 };
 exports.AdminModule = AdminModule;
@@ -25,6 +26,7 @@ exports.AdminModule = AdminModule = __decorate([
                 { name: module_schema_1.Module.name, schema: module_schema_1.ModuleSchema },
                 { name: avatar_level_schema_1.AvatarLevel.name, schema: avatar_level_schema_1.AvatarLevelSchema },
             ]),
+            notifications_module_1.NotificationsModule,
         ],
         controllers: [admin_controller_1.AdminController],
         providers: [admin_service_1.AdminService],

@@ -10,7 +10,10 @@ export declare class AdminController {
         email: string;
         firstName: string;
         lastName: string;
-        phone: string | undefined;
+        phoneOrTelegram: string | undefined;
+        group: string | undefined;
+        accessUntil: Date | undefined;
+        tariff: string | undefined;
         faculty: string | undefined;
         isAdmin: boolean;
         isCurator: boolean;
@@ -24,7 +27,10 @@ export declare class AdminController {
         email: string;
         firstName: string;
         lastName: string;
-        phone: string | undefined;
+        phoneOrTelegram: string | undefined;
+        group: string | undefined;
+        accessUntil: Date | undefined;
+        tariff: string | undefined;
         faculty: string | undefined;
         isAdmin: boolean;
         isCurator: boolean;
@@ -209,5 +215,25 @@ export declare class AdminController {
         _id: import("mongoose").Types.ObjectId;
     }> & {
         __v: number;
+    }>;
+    getLessonRatings(moduleId?: string): Promise<{
+        userId: any;
+        userEmail: string;
+        userName: string;
+        moduleId: string;
+        lessonNumber: number;
+        moodRating?: number;
+        usefulnessRating?: number;
+        completedAt: Date;
+    }[]>;
+    sendCustomNotification(body: {
+        title: string;
+        message: string;
+        url?: string;
+        sendToAll: boolean;
+        userIds?: string[];
+    }): Promise<{
+        sent: number;
+        failed: number;
     }>;
 }

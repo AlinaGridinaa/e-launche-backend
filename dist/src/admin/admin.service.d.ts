@@ -4,18 +4,24 @@ import { Module, ModuleDocument } from '../schemas/module.schema';
 import { AvatarLevel, AvatarLevelDocument } from '../schemas/avatar-level.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import { AwardAchievementDto } from './dto/award-achievement.dto';
+import { NotificationsService } from '../notifications/notifications.service';
 export declare class AdminService {
     private userModel;
     private moduleModel;
     private avatarLevelModel;
-    constructor(userModel: Model<UserDocument>, moduleModel: Model<ModuleDocument>, avatarLevelModel: Model<AvatarLevelDocument>);
+    private notificationsService;
+    constructor(userModel: Model<UserDocument>, moduleModel: Model<ModuleDocument>, avatarLevelModel: Model<AvatarLevelDocument>, notificationsService: NotificationsService);
     private loadAvatarsToCache;
+    uploadAvatarToCloudinary(filePath: string): Promise<string>;
     getAllUsers(): Promise<{
         id: import("mongoose").Types.ObjectId;
         email: string;
         firstName: string;
         lastName: string;
-        phone: string | undefined;
+        phoneOrTelegram: string | undefined;
+        group: string | undefined;
+        accessUntil: Date | undefined;
+        tariff: string | undefined;
         faculty: string | undefined;
         isAdmin: boolean;
         isCurator: boolean;
@@ -47,7 +53,10 @@ export declare class AdminService {
         email: string;
         firstName: string;
         lastName: string;
-        phone: string | undefined;
+        phoneOrTelegram: string | undefined;
+        group: string | undefined;
+        accessUntil: Date | undefined;
+        tariff: string | undefined;
         faculty: string | undefined;
         isAdmin: boolean;
         isCurator: boolean;
@@ -204,5 +213,19 @@ export declare class AdminService {
     initializeDefaultAvatars(): Promise<{
         message: string;
         count: number;
+    }>;
+    getLessonRatingsStatistics(moduleId?: string): Promise<{
+        userId: any;
+        userEmail: string;
+        userName: string;
+        moduleId: string;
+        lessonNumber: number;
+        moodRating?: number;
+        usefulnessRating?: number;
+        completedAt: Date;
+    }[]>;
+    sendCustomNotification(title: string, message: string, url: string | undefined, sendToAll: boolean, userIds: string[] | undefined): Promise<{
+        sent: number;
+        failed: number;
     }>;
 }

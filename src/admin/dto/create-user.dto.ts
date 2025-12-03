@@ -1,4 +1,4 @@
-import { IsEmail, IsString, MinLength, IsOptional, IsBoolean } from 'class-validator';
+import { IsEmail, IsString, MinLength, IsOptional, IsBoolean, IsDateString } from 'class-validator';
 
 export class CreateUserDto {
   @IsEmail()
@@ -16,7 +16,19 @@ export class CreateUserDto {
 
   @IsString()
   @IsOptional()
-  phone?: string;
+  phoneOrTelegram?: string; // Номер телефону або телеграм
+
+  @IsString()
+  @IsOptional()
+  group?: string; // Група студента
+
+  @IsDateString()
+  @IsOptional()
+  accessUntil?: string; // Доступ до якої дати (ISO string, якщо не вказано - назавжди)
+
+  @IsString()
+  @IsOptional()
+  tariff?: string; // Тариф: Преміум, ВІП, Легенда
 
   @IsString()
   @IsOptional()

@@ -18,6 +18,7 @@ const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
 const user_schema_1 = require("../schemas/user.schema");
 const module_schema_1 = require("../schemas/module.schema");
+const avatars_config_1 = require("../config/avatars.config");
 let ProfileService = class ProfileService {
     userModel;
     moduleModel;
@@ -53,8 +54,11 @@ let ProfileService = class ProfileService {
             earnings,
             rank: rank || 1,
         };
+        const avatarUrl = (0, avatars_config_1.getAvatarForLevel)(modulesCompleted);
+        const userObject = user.toObject();
+        userObject.avatarUrl = avatarUrl;
         return {
-            user: user.toObject(),
+            user: userObject,
             stats,
         };
     }

@@ -68,19 +68,6 @@ let DevController = class DevController {
     async seed() {
         try {
             await this.userModel.deleteMany({});
-            const hashedPassword = await bcrypt.hash('password123', 10);
-            const user = await this.userModel.create({
-                email: 'test@hogwarts.com',
-                password: hashedPassword,
-                firstName: 'Гаррі',
-                lastName: 'Поттер',
-                phone: '+380501234567',
-                faculty: 'Гріфіндор',
-                hasCompletedSorting: true,
-                hasAcceptedRules: true,
-                currentAvatarLevel: 0,
-                avatarUrl: (0, avatars_config_1.getAvatarForLevel)(0),
-            });
             const admin = await this.userModel.create({
                 email: 'admin@hogwarts.com',
                 password: await bcrypt.hash('admin123', 10),
@@ -92,12 +79,57 @@ let DevController = class DevController {
                 currentAvatarLevel: 0,
                 avatarUrl: (0, avatars_config_1.getAvatarForLevel)(0),
             });
+            const curator = await this.userModel.create({
+                email: 'curator@hogwarts.com',
+                password: await bcrypt.hash('curator123', 10),
+                firstName: 'Мінерва',
+                lastName: 'МакГонагалл',
+                isCurator: true,
+                hasCompletedSorting: true,
+                hasAcceptedRules: true,
+                currentAvatarLevel: 0,
+                avatarUrl: (0, avatars_config_1.getAvatarForLevel)(0),
+            });
+            const student1 = await this.userModel.create({
+                email: 'student1@hogwarts.com',
+                password: await bcrypt.hash('student123', 10),
+                firstName: 'Гаррі',
+                lastName: 'Поттер',
+                phoneOrTelegram: '@harry_potter',
+                group: '5 потік',
+                accessUntil: null,
+                tariff: 'Легенда',
+                faculty: 'Продюсер',
+                hasCompletedSorting: true,
+                hasAcceptedRules: true,
+                currentAvatarLevel: 0,
+                avatarUrl: (0, avatars_config_1.getAvatarForLevel)(0),
+                curatorId: curator._id.toString(),
+            });
+            const student2 = await this.userModel.create({
+                email: 'student2@hogwarts.com',
+                password: await bcrypt.hash('student123', 10),
+                firstName: 'Герміона',
+                lastName: 'Грейнджер',
+                phoneOrTelegram: '+380509876543',
+                group: '5 потік',
+                accessUntil: new Date('2026-12-31'),
+                tariff: 'Преміум',
+                faculty: 'Експерт',
+                hasCompletedSorting: true,
+                hasAcceptedRules: true,
+                currentAvatarLevel: 0,
+                avatarUrl: (0, avatars_config_1.getAvatarForLevel)(0),
+                curatorId: curator._id.toString(),
+            });
             return {
                 success: true,
-                message: 'Test users created',
+                message: 'Test users created successfully',
                 users: [
-                    { email: user.email, password: 'password123' },
-                    { email: admin.email, password: 'admin123' },
+                    { email: admin.email, password: 'admin123', role: 'Адмін' },
+                    { email: curator.email, password: 'curator123', role: 'Куратор' },
+                    { email: student1.email, password: 'student123', role: 'Студент', faculty: student1.faculty },
+                    { email: student2.email, password: 'student123', role: 'Студент', faculty: student2.faculty },
                 ],
             };
         }

@@ -19,14 +19,17 @@ const mongoose_2 = require("mongoose");
 const homework_schema_1 = require("../schemas/homework.schema");
 const user_schema_1 = require("../schemas/user.schema");
 const module_schema_1 = require("../schemas/module.schema");
+const notifications_service_1 = require("../notifications/notifications.service");
 let CuratorService = class CuratorService {
     homeworkModel;
     userModel;
     moduleModel;
-    constructor(homeworkModel, userModel, moduleModel) {
+    notificationsService;
+    constructor(homeworkModel, userModel, moduleModel, notificationsService) {
         this.homeworkModel = homeworkModel;
         this.userModel = userModel;
         this.moduleModel = moduleModel;
+        this.notificationsService = notificationsService;
     }
     async getHomeworksForCurator(curatorId) {
         const students = await this.userModel.find({ curatorId }).select('_id firstName lastName');
@@ -65,12 +68,31 @@ let CuratorService = class CuratorService {
         if (!student || student.curatorId !== curatorId) {
             throw new common_1.ForbiddenException('Це не ваш студент');
         }
+        const module = await this.moduleModel.findById(homework.moduleId);
+        const lessonTitle = module
+            ? `${module.title} - Урок ${homework.lessonNumber}`
+            : `Урок ${homework.lessonNumber}`;
         homework.curatorId = curatorId;
         homework.score = score;
         homework.feedback = feedback;
         homework.status = 'reviewed';
         homework.reviewedAt = new Date();
         await homework.save();
+        try {
+            await this.notificationsService.sendNotificationToUser(homework.userId, {
+                title: '✅ Домашнє завдання перевірено',
+                body: `${lessonTitle}: оцінка ${score}/100`,
+                icon: '/icons/icon-192.png',
+                badge: '/icons/icon-192.png',
+                data: {
+                    url: `/modules/${homework.moduleId}/lessons/${homework.lessonNumber}`,
+                    homeworkId: homework._id.toString(),
+                },
+            });
+        }
+        catch (error) {
+            console.error('Failed to send notification:', error);
+        }
         return {
             id: homework._id,
             score: homework.score,
@@ -88,12 +110,31 @@ let CuratorService = class CuratorService {
         if (!student || student.curatorId !== curatorId) {
             throw new common_1.ForbiddenException('Це не ваш студент');
         }
+        const module = await this.moduleModel.findById(homework.moduleId);
+        const lessonTitle = module
+            ? `${module.title} - Урок ${homework.lessonNumber}`
+            : `Урок ${homework.lessonNumber}`;
         homework.curatorId = curatorId;
         homework.feedback = feedback;
         homework.status = 'needs_revision';
         homework.reviewedAt = new Date();
         homework.score = undefined;
         await homework.save();
+        try {
+            await this.notificationsService.sendNotificationToUser(homework.userId, {
+                title: '📝 Домашнє завдання потребує доопрацювання',
+                body: `${lessonTitle}: ${feedback.substring(0, 80)}${feedback.length > 80 ? '...' : ''}`,
+                icon: '/icons/icon-192.png',
+                badge: '/icons/icon-192.png',
+                data: {
+                    url: `/modules/${homework.moduleId}/lessons/${homework.lessonNumber}`,
+                    homeworkId: homework._id.toString(),
+                },
+            });
+        }
+        catch (error) {
+            console.error('Failed to send notification:', error);
+        }
         return {
             id: homework._id,
             feedback: homework.feedback,
@@ -138,6 +179,7 @@ exports.CuratorService = CuratorService = __decorate([
     __param(2, (0, mongoose_1.InjectModel)(module_schema_1.Module.name)),
     __metadata("design:paramtypes", [mongoose_2.Model,
         mongoose_2.Model,
-        mongoose_2.Model])
+        mongoose_2.Model,
+        notifications_service_1.NotificationsService])
 ], CuratorService);
 //# sourceMappingURL=curator.service.js.map

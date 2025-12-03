@@ -54,14 +54,18 @@ const module_schema_1 = require("../schemas/module.schema");
 const avatar_level_schema_1 = require("../schemas/avatar-level.schema");
 const bcrypt = __importStar(require("bcrypt"));
 const avatars_config_1 = require("../config/avatars.config");
+const cloudinary_config_1 = require("../config/cloudinary.config");
+const notifications_service_1 = require("../notifications/notifications.service");
 let AdminService = class AdminService {
     userModel;
     moduleModel;
     avatarLevelModel;
-    constructor(userModel, moduleModel, avatarLevelModel) {
+    notificationsService;
+    constructor(userModel, moduleModel, avatarLevelModel, notificationsService) {
         this.userModel = userModel;
         this.moduleModel = moduleModel;
         this.avatarLevelModel = avatarLevelModel;
+        this.notificationsService = notificationsService;
         this.loadAvatarsToCache();
     }
     async loadAvatarsToCache() {
@@ -77,6 +81,16 @@ let AdminService = class AdminService {
             console.error('Failed to load avatars to cache:', error);
         }
     }
+    async uploadAvatarToCloudinary(filePath) {
+        try {
+            const imageUrl = await (0, cloudinary_config_1.uploadToCloudinary)(filePath, 'avatars');
+            return imageUrl;
+        }
+        catch (error) {
+            console.error('Failed to upload avatar to Cloudinary:', error);
+            throw new Error('Не вдалося завантажити аватар в Cloudinary');
+        }
+    }
     async getAllUsers() {
         const users = await this.userModel
             .find()
@@ -87,7 +101,10 @@ let AdminService = class AdminService {
             email: user.email,
             firstName: user.firstName,
             lastName: user.lastName,
-            phone: user.phone,
+            phoneOrTelegram: user.phoneOrTelegram,
+            group: user.group,
+            accessUntil: user.accessUntil,
+            tariff: user.tariff,
             faculty: user.faculty,
             isAdmin: user.isAdmin,
             isCurator: user.isCurator,
@@ -151,7 +168,10 @@ let AdminService = class AdminService {
             password: hashedPassword,
             firstName: createUserDto.firstName,
             lastName: createUserDto.lastName,
-            phone: createUserDto.phone || null,
+            phoneOrTelegram: createUserDto.phoneOrTelegram || null,
+            group: createUserDto.group || null,
+            accessUntil: createUserDto.accessUntil ? new Date(createUserDto.accessUntil) : null,
+            tariff: createUserDto.tariff || null,
             faculty: createUserDto.faculty || null,
             isAdmin: createUserDto.isAdmin || false,
             isCurator: createUserDto.isCurator || false,
@@ -167,7 +187,10 @@ let AdminService = class AdminService {
             email: newUser.email,
             firstName: newUser.firstName,
             lastName: newUser.lastName,
-            phone: newUser.phone,
+            phoneOrTelegram: newUser.phoneOrTelegram,
+            group: newUser.group,
+            accessUntil: newUser.accessUntil,
+            tariff: newUser.tariff,
             faculty: newUser.faculty,
             isAdmin: newUser.isAdmin,
             isCurator: newUser.isCurator,
@@ -470,6 +493,63 @@ let AdminService = class AdminService {
         await this.loadAvatarsToCache();
         return { message: 'Дефолтні аватари створено', count: 11 };
     }
+    async getLessonRatingsStatistics(moduleId) {
+        const users = await this.userModel.find().select('completedLessons firstName lastName email').exec();
+        const ratings = [];
+        for (const user of users) {
+            if (!user.completedLessons || user.completedLessons.length === 0)
+                continue;
+            for (const lesson of user.completedLessons) {
+                if (moduleId && lesson.moduleId !== moduleId)
+                    continue;
+                if (lesson.moodRating || lesson.usefulnessRating) {
+                    ratings.push({
+                        userId: user._id,
+                        userEmail: user.email,
+                        userName: `${user.firstName} ${user.lastName}`,
+                        moduleId: lesson.moduleId,
+                        lessonNumber: lesson.lessonNumber,
+                        moodRating: lesson.moodRating,
+                        usefulnessRating: lesson.usefulnessRating,
+                        completedAt: lesson.completedAt,
+                    });
+                }
+            }
+        }
+        return ratings;
+    }
+    async sendCustomNotification(title, message, url, sendToAll, userIds) {
+        const payload = {
+            title,
+            body: message,
+            icon: '/icons/icon-192.png',
+            badge: '/icons/icon-192.png',
+            data: url ? { url } : undefined,
+        };
+        if (sendToAll) {
+            const result = await this.notificationsService.sendNotificationToAll(payload);
+            return { sent: result.sent, failed: result.failed };
+        }
+        else if (userIds && userIds.length > 0) {
+            let totalSent = 0;
+            let totalFailed = 0;
+            for (const userId of userIds) {
+                try {
+                    const result = await this.notificationsService.sendNotificationToUser(userId, payload);
+                    totalSent += result.sent;
+                    totalFailed += result.failed;
+                }
+                catch (error) {
+                    console.error(`Failed to send notification to user ${userId}:`, error);
+                    totalFailed++;
+                }
+            }
+            return { sent: totalSent, failed: totalFailed };
+        }
+        else {
+            throw new Error('Потрібно вказати або sendToAll=true, або список userIds');
+        }
+    }
 };
 exports.AdminService = AdminService;
 exports.AdminService = AdminService = __decorate([
@@ -479,6 +559,7 @@ exports.AdminService = AdminService = __decorate([
     __param(2, (0, mongoose_1.InjectModel)(avatar_level_schema_1.AvatarLevel.name)),
     __metadata("design:paramtypes", [mongoose_2.Model,
         mongoose_2.Model,
-        mongoose_2.Model])
+        mongoose_2.Model,
+        notifications_service_1.NotificationsService])
 ], AdminService);
 //# sourceMappingURL=admin.service.js.map

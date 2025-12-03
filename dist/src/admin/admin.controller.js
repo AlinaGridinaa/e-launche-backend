@@ -111,8 +111,16 @@ let AdminController = class AdminController {
         if (!file) {
             throw new Error('Файл не завантажено');
         }
-        const imageUrl = `/uploads/avatars/${file.filename}`;
+        const imageUrl = await this.adminService.uploadAvatarToCloudinary(file.path);
+        const fs = require('fs');
+        fs.unlinkSync(file.path);
         return this.adminService.setAvatarLevel(+level, imageUrl, description);
+    }
+    async getLessonRatings(moduleId) {
+        return this.adminService.getLessonRatingsStatistics(moduleId);
+    }
+    async sendCustomNotification(body) {
+        return this.adminService.sendCustomNotification(body.title, body.message, body.url, body.sendToAll, body.userIds);
     }
 };
 exports.AdminController = AdminController;
@@ -327,6 +335,20 @@ __decorate([
     __metadata("design:paramtypes", [Number, Object, String]),
     __metadata("design:returntype", Promise)
 ], AdminController.prototype, "uploadAvatarImage", null);
+__decorate([
+    (0, common_1.Get)('lesson-ratings'),
+    __param(0, (0, common_1.Param)('moduleId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "getLessonRatings", null);
+__decorate([
+    (0, common_1.Post)('send-notification'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "sendCustomNotification", null);
 exports.AdminController = AdminController = __decorate([
     (0, common_1.Controller)('admin'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),

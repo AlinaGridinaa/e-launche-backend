@@ -3,7 +3,10 @@ export declare class CreateUserDto {
     password: string;
     firstName: string;
     lastName: string;
-    phone?: string;
+    phoneOrTelegram?: string;
+    group?: string;
+    accessUntil?: string;
+    tariff?: string;
     faculty?: string;
     isAdmin?: boolean;
     isCurator?: boolean;

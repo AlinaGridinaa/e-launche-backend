@@ -5,6 +5,7 @@ export declare class ModulesService {
     private moduleModel;
     private userModel;
     constructor(moduleModel: Model<ModuleDocument>, userModel: Model<UserDocument>);
+    private getMaxModulesByTariff;
     findAll(): Promise<Module[]>;
     findAllWithUserProgress(userId: string): Promise<Module[]>;
     findById(id: string): Promise<Module | null>;

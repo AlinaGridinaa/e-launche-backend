@@ -2,11 +2,13 @@ import { Model } from 'mongoose';
 import { HomeworkDocument } from '../schemas/homework.schema';
 import { UserDocument } from '../schemas/user.schema';
 import { ModuleDocument } from '../schemas/module.schema';
+import { NotificationsService } from '../notifications/notifications.service';
 export declare class CuratorService {
     private homeworkModel;
     private userModel;
     private moduleModel;
-    constructor(homeworkModel: Model<HomeworkDocument>, userModel: Model<UserDocument>, moduleModel: Model<ModuleDocument>);
+    private notificationsService;
+    constructor(homeworkModel: Model<HomeworkDocument>, userModel: Model<UserDocument>, moduleModel: Model<ModuleDocument>, notificationsService: NotificationsService);
     getHomeworksForCurator(curatorId: string): Promise<{
         id: import("mongoose").Types.ObjectId;
         studentId: string;
