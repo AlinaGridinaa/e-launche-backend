@@ -579,6 +579,14 @@ export class DevController {
           continue;
         }
 
+        // Перевіряємо валідність email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          console.log(`⚠️ Skipping row ${i}: invalid email format (${email})`);
+          skipped++;
+          continue;
+        }
+
         // Ім'я та прізвище зберігаємо разом в firstName
         const firstName = fullName || 'Студент';
         const lastName = 'Студент'; // Порожнє прізвище (потрібне для валідації)
@@ -708,6 +716,14 @@ export class DevController {
           continue;
         }
 
+        // Перевіряємо валідність email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          console.log(`⚠️ Skipping row ${i}: invalid email format (${email})`);
+          skipped++;
+          continue;
+        }
+
         // Ім'я та прізвище зберігаємо разом в firstName
         const firstName = fullName || 'Студент';
         const lastName = 'Студент'; // Порожнє прізвище (потрібне для валідації)
@@ -799,6 +815,47 @@ export class DevController {
     }
   }
 
+  @Post('clean-invalid-users')
+  @HttpCode(HttpStatus.OK)
+  async cleanInvalidUsers() {
+    try {
+      // Знаходимо користувачів з невалідними email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const allUsers = await this.userModel.find({});
+      
+      const invalidUsers = allUsers.filter(user => !emailRegex.test(user.email));
+      
+      if (invalidUsers.length === 0) {
+        return {
+          success: true,
+          message: 'Невалідних користувачів не знайдено',
+          deleted: 0,
+        };
+      }
+
+      // Видаляємо невалідних користувачів
+      const deletePromises = invalidUsers.map(user => 
+        this.userModel.deleteOne({ _id: user._id })
+      );
+      
+      await Promise.all(deletePromises);
+
+      return {
+        success: true,
+        message: `Видалено ${invalidUsers.length} користувачів з невалідними email`,
+        deleted: invalidUsers.length,
+        deletedEmails: invalidUsers.map(u => u.email),
+      };
+    } catch (error) {
+      console.error('❌ Error cleaning invalid users:', error);
+      return {
+        success: false,
+        error: error.message,
+        stack: error.stack,
+      };
+    }
+  }
+
   @Post('seed-premium')
   @HttpCode(HttpStatus.OK)
   async seedPremium() {
@@ -833,6 +890,14 @@ export class DevController {
         // Перевіряємо обов'язкові поля
         if (!fullName || !email || !password) {
           console.log(`⚠️ Skipping row ${i}: missing required fields`);
+          skipped++;
+          continue;
+        }
+
+        // Перевіряємо валідність email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          console.log(`⚠️ Skipping row ${i}: invalid email format (${email})`);
           skipped++;
           continue;
         }

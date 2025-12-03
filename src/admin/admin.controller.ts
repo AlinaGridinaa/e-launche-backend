@@ -1,4 +1,4 @@
-import { Controller, Get, Put, Post, Delete, Body, Param, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Put, Post, Patch, Delete, Body, Param, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AdminService } from './admin.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -20,6 +20,14 @@ export class AdminController {
   @Post('users')
   async createUser(@Body() createUserDto: CreateUserDto) {
     return this.adminService.createUser(createUserDto);
+  }
+
+  @Patch('users/:userId')
+  async updateUser(
+    @Param('userId') userId: string,
+    @Body() updateUserDto: Partial<CreateUserDto>,
+  ) {
+    return this.adminService.updateUser(userId, updateUserDto);
   }
 
   @Put('users/:userId/faculty')

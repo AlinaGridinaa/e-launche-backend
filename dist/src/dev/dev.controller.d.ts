@@ -193,6 +193,28 @@ export declare class DevController {
         message?: undefined;
         students?: undefined;
     }>;
+    cleanInvalidUsers(): Promise<{
+        success: boolean;
+        message: string;
+        deleted: number;
+        deletedEmails?: undefined;
+        error?: undefined;
+        stack?: undefined;
+    } | {
+        success: boolean;
+        message: string;
+        deleted: number;
+        deletedEmails: string[];
+        error?: undefined;
+        stack?: undefined;
+    } | {
+        success: boolean;
+        error: any;
+        stack: any;
+        message?: undefined;
+        deleted?: undefined;
+        deletedEmails?: undefined;
+    }>;
     seedPremium(): Promise<{
         success: boolean;
         message: string;

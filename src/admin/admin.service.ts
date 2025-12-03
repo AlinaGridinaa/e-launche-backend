@@ -71,6 +71,47 @@ export class AdminService {
     }));
   }
 
+  async updateUser(userId: string, updateData: Partial<CreateUserDto>) {
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new NotFoundException('Користувача не знайдено');
+    }
+
+    // Перевіряємо чи email вже використовується іншим користувачем
+    if (updateData.email && updateData.email !== user.email) {
+      const existingUser = await this.userModel.findOne({ email: updateData.email });
+      if (existingUser) {
+        throw new ConflictException('Користувач з таким email вже існує');
+      }
+      user.email = updateData.email;
+    }
+
+    // Оновлюємо дозволені поля
+    if (updateData.firstName !== undefined) user.firstName = updateData.firstName;
+    if (updateData.lastName !== undefined) user.lastName = updateData.lastName;
+    if (updateData.phoneOrTelegram !== undefined) user.phoneOrTelegram = updateData.phoneOrTelegram;
+    if (updateData.group !== undefined) user.group = updateData.group;
+    if (updateData.accessUntil !== undefined) {
+      user.accessUntil = updateData.accessUntil ? new Date(updateData.accessUntil) : undefined;
+    }
+    if (updateData.tariff !== undefined) user.tariff = updateData.tariff;
+    if (updateData.faculty !== undefined) user.faculty = updateData.faculty;
+
+    await user.save();
+
+    return {
+      id: user._id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      phoneOrTelegram: user.phoneOrTelegram,
+      group: user.group,
+      accessUntil: user.accessUntil,
+      tariff: user.tariff,
+      faculty: user.faculty,
+    };
+  }
+
   async assignFaculty(userId: string, faculty: string) {
     const user = await this.userModel.findById(userId);
     if (!user) {

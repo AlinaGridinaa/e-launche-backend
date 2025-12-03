@@ -541,6 +541,12 @@ let DevController = class DevController {
                     skipped++;
                     continue;
                 }
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    console.log(`⚠️ Skipping row ${i}: invalid email format (${email})`);
+                    skipped++;
+                    continue;
+                }
                 const firstName = fullName || 'Студент';
                 const lastName = 'Студент';
                 const existingStudent = await this.userModel.findOne({ email });
@@ -643,6 +649,12 @@ let DevController = class DevController {
                     skipped++;
                     continue;
                 }
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    console.log(`⚠️ Skipping row ${i}: invalid email format (${email})`);
+                    skipped++;
+                    continue;
+                }
                 const firstName = fullName || 'Студент';
                 const lastName = 'Студент';
                 const existingStudent = await this.userModel.findOne({ email });
@@ -720,6 +732,36 @@ let DevController = class DevController {
             };
         }
     }
+    async cleanInvalidUsers() {
+        try {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const allUsers = await this.userModel.find({});
+            const invalidUsers = allUsers.filter(user => !emailRegex.test(user.email));
+            if (invalidUsers.length === 0) {
+                return {
+                    success: true,
+                    message: 'Невалідних користувачів не знайдено',
+                    deleted: 0,
+                };
+            }
+            const deletePromises = invalidUsers.map(user => this.userModel.deleteOne({ _id: user._id }));
+            await Promise.all(deletePromises);
+            return {
+                success: true,
+                message: `Видалено ${invalidUsers.length} користувачів з невалідними email`,
+                deleted: invalidUsers.length,
+                deletedEmails: invalidUsers.map(u => u.email),
+            };
+        }
+        catch (error) {
+            console.error('❌ Error cleaning invalid users:', error);
+            return {
+                success: false,
+                error: error.message,
+                stack: error.stack,
+            };
+        }
+    }
     async seedPremium() {
         try {
             const csvPath = path.join(process.cwd(), 'преміум.csv');
@@ -742,6 +784,12 @@ let DevController = class DevController {
                 const accessType = row[8]?.trim();
                 if (!fullName || !email || !password) {
                     console.log(`⚠️ Skipping row ${i}: missing required fields`);
+                    skipped++;
+                    continue;
+                }
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    console.log(`⚠️ Skipping row ${i}: invalid email format (${email})`);
                     skipped++;
                     continue;
                 }
@@ -914,6 +962,13 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], DevController.prototype, "seedVip", null);
+__decorate([
+    (0, common_1.Post)('clean-invalid-users'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], DevController.prototype, "cleanInvalidUsers", null);
 __decorate([
     (0, common_1.Post)('seed-premium'),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
