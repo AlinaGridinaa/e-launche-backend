@@ -4,6 +4,7 @@ import { Document } from 'mongoose';
 export type ScheduleEventDocument = ScheduleEvent & Document;
 
 export enum EventType {
+  ONLINE_MEETING = 'online_meeting',
   PLATFORM_OPENING = 'platform_opening',
   LIVE_STREAM = 'live_stream',
   MODULE_OPENING = 'module_opening',
@@ -31,9 +32,9 @@ export class ScheduleEvent {
   @Prop({ 
     type: String, 
     enum: EventType,
-    default: EventType.LIVE_STREAM 
+    required: false
   })
-  type: EventType;
+  type?: EventType;
 
   @Prop()
   link?: string; // Посилання на Zoom, YouTube тощо
