@@ -92,7 +92,7 @@ export class AdminService {
     if (updateData.phoneOrTelegram !== undefined) user.phoneOrTelegram = updateData.phoneOrTelegram;
     if (updateData.group !== undefined) user.group = updateData.group;
     if (updateData.accessUntil !== undefined) {
-      user.accessUntil = updateData.accessUntil ? new Date(updateData.accessUntil) : undefined;
+      user.accessUntil = updateData.accessUntil && updateData.accessUntil.trim() !== '' ? new Date(updateData.accessUntil) : undefined;
     }
     if (updateData.tariff !== undefined) user.tariff = updateData.tariff;
     if (updateData.faculty !== undefined) user.faculty = updateData.faculty;
@@ -183,7 +183,7 @@ export class AdminService {
       lastName: createUserDto.lastName,
       phoneOrTelegram: createUserDto.phoneOrTelegram || null,
       group: createUserDto.group || null,
-      accessUntil: createUserDto.accessUntil ? new Date(createUserDto.accessUntil) : null,
+      accessUntil: createUserDto.accessUntil && createUserDto.accessUntil.trim() !== '' ? new Date(createUserDto.accessUntil) : undefined,
       tariff: createUserDto.tariff || null,
       faculty: createUserDto.faculty || null,
       isAdmin: createUserDto.isAdmin || false,
