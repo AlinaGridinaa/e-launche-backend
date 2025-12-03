@@ -115,7 +115,7 @@ async function updateSchedule() {
         console.log('➕ Adding new schedule events...');
         await ScheduleEvent.insertMany(scheduleEvents);
         console.log('✅ Schedule updated successfully!');
-        console.log(`📅 Added ${scheduleEvents.length} events`);
+        console.log(`🗓 Added ${scheduleEvents.length} events`);
         await mongoose.disconnect();
         console.log('👋 Disconnected from MongoDB');
     }

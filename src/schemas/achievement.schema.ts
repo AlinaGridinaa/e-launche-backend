@@ -93,7 +93,7 @@ export const ACHIEVEMENT_TYPES: AchievementType[] = [
   {
     id: 'weekly_results',
     title: 'Навчальний тиждень',
-    emoji: '📅',
+    emoji: '🗓',
     description: 'Позначка у сторіс про ваші результати за тиждень.',
     category: 'progress',
   },

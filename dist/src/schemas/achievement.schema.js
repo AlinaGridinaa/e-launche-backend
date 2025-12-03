@@ -110,7 +110,7 @@ exports.ACHIEVEMENT_TYPES = [
     {
         id: 'weekly_results',
         title: 'Навчальний тиждень',
-        emoji: '📅',
+        emoji: '🗓',
         description: 'Позначка у сторіс про ваші результати за тиждень.',
         category: 'progress',
     },
