@@ -112,6 +112,27 @@ export class AdminService {
     };
   }
 
+  async changePassword(userId: string, password: string) {
+    if (!password || password.length < 6) {
+      throw new ConflictException('Пароль має бути не менше 6 символів');
+    }
+
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new NotFoundException('Користувача не знайдено');
+    }
+
+    // Хешуємо новий пароль
+    const hashedPassword = await bcrypt.hash(password, 10);
+    user.password = hashedPassword;
+    await user.save();
+
+    return {
+      success: true,
+      message: 'Пароль успішно змінено',
+    };
+  }
+
   async assignFaculty(userId: string, faculty: string) {
     const user = await this.userModel.findById(userId);
     if (!user) {

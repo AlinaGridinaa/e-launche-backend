@@ -30,6 +30,14 @@ export class AdminController {
     return this.adminService.updateUser(userId, updateUserDto);
   }
 
+  @Patch('users/:userId/password')
+  async changePassword(
+    @Param('userId') userId: string,
+    @Body('password') password: string,
+  ) {
+    return this.adminService.changePassword(userId, password);
+  }
+
   @Put('users/:userId/faculty')
   async assignFaculty(
     @Param('userId') userId: string,
