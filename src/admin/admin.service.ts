@@ -78,12 +78,14 @@ export class AdminService {
     }
 
     // Перевіряємо чи email вже використовується іншим користувачем
-    if (updateData.email && updateData.email !== user.email) {
-      const existingUser = await this.userModel.findOne({ email: updateData.email });
+    if (updateData.email && updateData.email.toLowerCase() !== user.email.toLowerCase()) {
+      const existingUser = await this.userModel.findOne({ 
+        email: { $regex: new RegExp(`^${updateData.email}$`, 'i') } 
+      });
       if (existingUser) {
         throw new ConflictException('Користувач з таким email вже існує');
       }
-      user.email = updateData.email;
+      user.email = updateData.email.toLowerCase();
     }
 
     // Оновлюємо дозволені поля
@@ -187,8 +189,10 @@ export class AdminService {
   }
 
   async createUser(createUserDto: CreateUserDto) {
-    // Перевіряємо чи існує користувач з таким email
-    const existingUser = await this.userModel.findOne({ email: createUserDto.email });
+    // Перевіряємо чи існує користувач з таким email (без урахування регістру)
+    const existingUser = await this.userModel.findOne({ 
+      email: { $regex: new RegExp(`^${createUserDto.email}$`, 'i') } 
+    });
     if (existingUser) {
       throw new ConflictException('Користувач з таким email вже існує');
     }
@@ -198,7 +202,7 @@ export class AdminService {
 
     // Створюємо нового користувача
     const newUser = new this.userModel({
-      email: createUserDto.email,
+      email: createUserDto.email.toLowerCase(),
       password: hashedPassword,
       firstName: createUserDto.firstName,
       lastName: createUserDto.lastName,

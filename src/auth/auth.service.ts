@@ -18,8 +18,10 @@ export class AuthService {
   async login(loginDto: LoginDto) {
     const { email, password } = loginDto;
 
-    // Пошук користувача
-    const user = await this.userModel.findOne({ email }).exec();
+    // Пошук користувача без урахування регістру
+    const user = await this.userModel.findOne({ 
+      email: { $regex: new RegExp(`^${email}$`, 'i') } 
+    }).exec();
 
     if (!user) {
       throw new UnauthorizedException('Невірний email або пароль');
