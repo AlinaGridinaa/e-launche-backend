@@ -114,6 +114,64 @@ let AdminService = class AdminService {
             completedModulesCount: user.completedModules?.length || 0,
         }));
     }
+    async updateUser(userId, updateData) {
+        const user = await this.userModel.findById(userId);
+        if (!user) {
+            throw new common_1.NotFoundException('Користувача не знайдено');
+        }
+        if (updateData.email && updateData.email.toLowerCase() !== user.email.toLowerCase()) {
+            const existingUser = await this.userModel.findOne({
+                email: { $regex: new RegExp(`^${updateData.email}$`, 'i') }
+            });
+            if (existingUser) {
+                throw new common_1.ConflictException('Користувач з таким email вже існує');
+            }
+            user.email = updateData.email.toLowerCase();
+        }
+        if (updateData.firstName !== undefined)
+            user.firstName = updateData.firstName;
+        if (updateData.lastName !== undefined)
+            user.lastName = updateData.lastName;
+        if (updateData.phoneOrTelegram !== undefined)
+            user.phoneOrTelegram = updateData.phoneOrTelegram;
+        if (updateData.group !== undefined)
+            user.group = updateData.group;
+        if (updateData.accessUntil !== undefined) {
+            user.accessUntil = updateData.accessUntil && updateData.accessUntil.trim() !== '' ? new Date(updateData.accessUntil) : undefined;
+        }
+        if (updateData.tariff !== undefined)
+            user.tariff = updateData.tariff;
+        if (updateData.faculty !== undefined)
+            user.faculty = updateData.faculty;
+        await user.save();
+        return {
+            id: user._id,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            phoneOrTelegram: user.phoneOrTelegram,
+            group: user.group,
+            accessUntil: user.accessUntil,
+            tariff: user.tariff,
+            faculty: user.faculty,
+        };
+    }
+    async changePassword(userId, password) {
+        if (!password || password.length < 6) {
+            throw new common_1.ConflictException('Пароль має бути не менше 6 символів');
+        }
+        const user = await this.userModel.findById(userId);
+        if (!user) {
+            throw new common_1.NotFoundException('Користувача не знайдено');
+        }
+        const hashedPassword = await bcrypt.hash(password, 10);
+        user.password = hashedPassword;
+        await user.save();
+        return {
+            success: true,
+            message: 'Пароль успішно змінено',
+        };
+    }
     async assignFaculty(userId, faculty) {
         const user = await this.userModel.findById(userId);
         if (!user) {
@@ -158,19 +216,21 @@ let AdminService = class AdminService {
         };
     }
     async createUser(createUserDto) {
-        const existingUser = await this.userModel.findOne({ email: createUserDto.email });
+        const existingUser = await this.userModel.findOne({
+            email: { $regex: new RegExp(`^${createUserDto.email}$`, 'i') }
+        });
         if (existingUser) {
             throw new common_1.ConflictException('Користувач з таким email вже існує');
         }
         const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
         const newUser = new this.userModel({
-            email: createUserDto.email,
+            email: createUserDto.email.toLowerCase(),
             password: hashedPassword,
             firstName: createUserDto.firstName,
             lastName: createUserDto.lastName,
             phoneOrTelegram: createUserDto.phoneOrTelegram || null,
             group: createUserDto.group || null,
-            accessUntil: createUserDto.accessUntil ? new Date(createUserDto.accessUntil) : null,
+            accessUntil: createUserDto.accessUntil && createUserDto.accessUntil.trim() !== '' ? new Date(createUserDto.accessUntil) : undefined,
             tariff: createUserDto.tariff || null,
             faculty: createUserDto.faculty || null,
             isAdmin: createUserDto.isAdmin || false,
@@ -531,11 +591,14 @@ let AdminService = class AdminService {
             return { sent: result.sent, failed: result.failed };
         }
         else if (userIds && userIds.length > 0) {
+            console.log('Sending notifications to users:', userIds);
             let totalSent = 0;
             let totalFailed = 0;
             for (const userId of userIds) {
                 try {
+                    console.log(`Sending notification to user ${userId}`);
                     const result = await this.notificationsService.sendNotificationToUser(userId, payload);
+                    console.log(`Result for user ${userId}:`, result);
                     totalSent += result.sent;
                     totalFailed += result.failed;
                 }
@@ -544,6 +607,7 @@ let AdminService = class AdminService {
                     totalFailed++;
                 }
             }
+            console.log(`Total sent: ${totalSent}, Total failed: ${totalFailed}`);
             return { sent: totalSent, failed: totalFailed };
         }
         else {

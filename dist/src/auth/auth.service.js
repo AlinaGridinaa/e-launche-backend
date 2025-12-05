@@ -63,7 +63,9 @@ let AuthService = AuthService_1 = class AuthService {
     }
     async login(loginDto) {
         const { email, password } = loginDto;
-        const user = await this.userModel.findOne({ email }).exec();
+        const user = await this.userModel.findOne({
+            email: { $regex: new RegExp(`^${email}$`, 'i') }
+        }).exec();
         if (!user) {
             throw new common_1.UnauthorizedException('Невірний email або пароль');
         }

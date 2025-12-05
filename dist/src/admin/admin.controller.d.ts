@@ -36,6 +36,21 @@ export declare class AdminController {
         isCurator: boolean;
         earnings: number;
     }>;
+    updateUser(userId: string, updateUserDto: Partial<CreateUserDto>): Promise<{
+        id: import("mongoose").Types.ObjectId;
+        email: string;
+        firstName: string;
+        lastName: string;
+        phoneOrTelegram: string | undefined;
+        group: string | undefined;
+        accessUntil: Date | undefined;
+        tariff: string | undefined;
+        faculty: string | undefined;
+    }>;
+    changePassword(userId: string, password: string): Promise<{
+        success: boolean;
+        message: string;
+    }>;
     assignFaculty(userId: string, assignFacultyDto: AssignFacultyDto): Promise<{
         id: import("mongoose").Types.ObjectId;
         email: string;

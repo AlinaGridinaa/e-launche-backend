@@ -13,6 +13,7 @@ exports.ScheduleEventSchema = exports.ScheduleEvent = exports.EventType = void 0
 const mongoose_1 = require("@nestjs/mongoose");
 var EventType;
 (function (EventType) {
+    EventType["ONLINE_MEETING"] = "online_meeting";
     EventType["PLATFORM_OPENING"] = "platform_opening";
     EventType["LIVE_STREAM"] = "live_stream";
     EventType["MODULE_OPENING"] = "module_opening";
@@ -57,7 +58,7 @@ __decorate([
     (0, mongoose_1.Prop)({
         type: String,
         enum: EventType,
-        default: EventType.LIVE_STREAM
+        required: false
     }),
     __metadata("design:type", String)
 ], ScheduleEvent.prototype, "type", void 0);

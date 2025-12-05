@@ -32,6 +32,12 @@ let AdminController = class AdminController {
     async createUser(createUserDto) {
         return this.adminService.createUser(createUserDto);
     }
+    async updateUser(userId, updateUserDto) {
+        return this.adminService.updateUser(userId, updateUserDto);
+    }
+    async changePassword(userId, password) {
+        return this.adminService.changePassword(userId, password);
+    }
     async assignFaculty(userId, assignFacultyDto) {
         return this.adminService.assignFaculty(userId, assignFacultyDto.faculty);
     }
@@ -137,6 +143,22 @@ __decorate([
     __metadata("design:paramtypes", [create_user_dto_1.CreateUserDto]),
     __metadata("design:returntype", Promise)
 ], AdminController.prototype, "createUser", null);
+__decorate([
+    (0, common_1.Patch)('users/:userId'),
+    __param(0, (0, common_1.Param)('userId')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "updateUser", null);
+__decorate([
+    (0, common_1.Patch)('users/:userId/password'),
+    __param(0, (0, common_1.Param)('userId')),
+    __param(1, (0, common_1.Body)('password')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "changePassword", null);
 __decorate([
     (0, common_1.Put)('users/:userId/faculty'),
     __param(0, (0, common_1.Param)('userId')),

@@ -22,8 +22,8 @@ export class CreateUserDto {
   @IsOptional()
   group?: string; // Група студента
 
-  @IsDateString()
   @IsOptional()
+  @IsDateString()
   accessUntil?: string; // Доступ до якої дати (ISO string, якщо не вказано - назавжди)
 
   @IsString()

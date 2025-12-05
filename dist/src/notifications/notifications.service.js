@@ -24,6 +24,7 @@ let NotificationsService = class NotificationsService {
         this.pushSubscriptionModel = pushSubscriptionModel;
     }
     async saveSubscription(userId, subscription) {
+        console.log(`Saving subscription for userId: ${userId}`);
         await this.pushSubscriptionModel.deleteMany({
             userId,
             endpoint: subscription.endpoint,
@@ -36,6 +37,7 @@ let NotificationsService = class NotificationsService {
             isActive: true,
         });
         await newSubscription.save();
+        console.log(`Subscription saved with userId: ${newSubscription.userId}`);
         return { success: true, message: 'Підписку збережено' };
     }
     async removeSubscription(userId, endpoint) {
@@ -46,7 +48,11 @@ let NotificationsService = class NotificationsService {
         return this.pushSubscriptionModel.find({ userId, isActive: true });
     }
     async sendNotificationToUser(userId, payload) {
+        console.log(`Looking for subscriptions for userId: ${userId}`);
+        const allSubs = await this.pushSubscriptionModel.find({}).limit(5);
+        console.log(`Sample subscriptions in DB:`, allSubs.map(s => ({ userId: s.userId, isActive: s.isActive })));
         const subscriptions = await this.getUserSubscriptions(userId);
+        console.log(`Found ${subscriptions.length} subscriptions for user ${userId}`);
         if (subscriptions.length === 0) {
             console.log(`No active subscriptions for user ${userId}`);
             return { sent: 0, failed: 0 };

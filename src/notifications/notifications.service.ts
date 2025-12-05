@@ -25,6 +25,7 @@ export class NotificationsService {
 
   // Зберегти підписку користувача
   async saveSubscription(userId: string, subscription: any) {
+    console.log(`Saving subscription for userId: ${userId}`);
     // Видаляємо старі підписки цього користувача для цього endpoint
     await this.pushSubscriptionModel.deleteMany({
       userId,
@@ -41,6 +42,7 @@ export class NotificationsService {
     });
 
     await newSubscription.save();
+    console.log(`Subscription saved with userId: ${newSubscription.userId}`);
 
     return { success: true, message: 'Підписку збережено' };
   }
@@ -58,7 +60,14 @@ export class NotificationsService {
 
   // Відправити нотифікацію одному користувачу
   async sendNotificationToUser(userId: string, payload: NotificationPayload) {
+    console.log(`Looking for subscriptions for userId: ${userId}`);
+    
+    // Додамо логування всіх підписок в базі
+    const allSubs = await this.pushSubscriptionModel.find({}).limit(5);
+    console.log(`Sample subscriptions in DB:`, allSubs.map(s => ({ userId: s.userId, isActive: s.isActive })));
+    
     const subscriptions = await this.getUserSubscriptions(userId);
+    console.log(`Found ${subscriptions.length} subscriptions for user ${userId}`);
 
     if (subscriptions.length === 0) {
       console.log(`No active subscriptions for user ${userId}`);

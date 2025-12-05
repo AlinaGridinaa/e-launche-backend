@@ -135,6 +135,20 @@ export class AdminService {
     };
   }
 
+  async deleteUser(userId: string) {
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new NotFoundException('Користувача не знайдено');
+    }
+
+    await this.userModel.deleteOne({ _id: userId });
+
+    return {
+      success: true,
+      message: 'Користувача видалено',
+    };
+  }
+
   async assignFaculty(userId: string, faculty: string) {
     const user = await this.userModel.findById(userId);
     if (!user) {
@@ -720,12 +734,15 @@ export class AdminService {
       return { sent: result.sent, failed: result.failed };
     } else if (userIds && userIds.length > 0) {
       // Відправити вибраним користувачам
+      console.log('Sending notifications to users:', userIds);
       let totalSent = 0;
       let totalFailed = 0;
 
       for (const userId of userIds) {
         try {
+          console.log(`Sending notification to user ${userId}`);
           const result = await this.notificationsService.sendNotificationToUser(userId, payload);
+          console.log(`Result for user ${userId}:`, result);
           totalSent += result.sent;
           totalFailed += result.failed;
         } catch (error) {
@@ -734,6 +751,7 @@ export class AdminService {
         }
       }
 
+      console.log(`Total sent: ${totalSent}, Total failed: ${totalFailed}`);
       return { sent: totalSent, failed: totalFailed };
     } else {
       throw new Error('Потрібно вказати або sendToAll=true, або список userIds');

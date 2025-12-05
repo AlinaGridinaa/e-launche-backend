@@ -38,6 +38,11 @@ export class AdminController {
     return this.adminService.changePassword(userId, password);
   }
 
+  @Delete('users/:userId')
+  async deleteUser(@Param('userId') userId: string) {
+    return this.adminService.deleteUser(userId);
+  }
+
   @Put('users/:userId/faculty')
   async assignFaculty(
     @Param('userId') userId: string,

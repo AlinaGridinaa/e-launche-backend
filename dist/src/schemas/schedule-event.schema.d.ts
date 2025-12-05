@@ -1,6 +1,7 @@
 import { Document } from 'mongoose';
 export type ScheduleEventDocument = ScheduleEvent & Document;
 export declare enum EventType {
+    ONLINE_MEETING = "online_meeting",
     PLATFORM_OPENING = "platform_opening",
     LIVE_STREAM = "live_stream",
     MODULE_OPENING = "module_opening",
@@ -13,7 +14,7 @@ export declare class ScheduleEvent {
     date: Date;
     time?: string;
     timeEurope?: string;
-    type: EventType;
+    type?: EventType;
     link?: string;
     speaker?: string;
     isCompleted: boolean;
