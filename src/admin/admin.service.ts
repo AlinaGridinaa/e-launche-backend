@@ -793,7 +793,7 @@ export class AdminService {
     const curatorMap = new Map(curators.map(c => [c._id.toString(), `${c.firstName} ${c.lastName}`]));
 
     // Формуємо CSV
-    const csvRows = [];
+    const csvRows: string[] = [];
     
     // Заголовки
     csvRows.push([
@@ -818,6 +818,7 @@ export class AdminService {
     for (const user of users) {
       const curatorName = user.curatorId ? curatorMap.get(user.curatorId) || 'Не знайдено' : '-';
       const accessUntil = user.accessUntil ? new Date(user.accessUntil).toLocaleDateString('uk-UA') : 'Безлімітний';
+      const createdAt = (user as any).createdAt ? new Date((user as any).createdAt).toLocaleDateString('uk-UA') : '-';
       
       csvRows.push([
         user.email,
@@ -834,7 +835,7 @@ export class AdminService {
         user.completedLessons?.length || 0,
         user.completedModules?.length || 0,
         user.earnings || 0,
-        new Date(user.createdAt).toLocaleDateString('uk-UA')
+        createdAt
       ].map(field => `"${field}"`).join(','));
     }
 
