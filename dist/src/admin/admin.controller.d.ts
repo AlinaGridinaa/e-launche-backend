@@ -51,6 +51,10 @@ export declare class AdminController {
         success: boolean;
         message: string;
     }>;
+    deleteUser(userId: string): Promise<{
+        success: boolean;
+        message: string;
+    }>;
     assignFaculty(userId: string, assignFacultyDto: AssignFacultyDto): Promise<{
         id: import("mongoose").Types.ObjectId;
         email: string;

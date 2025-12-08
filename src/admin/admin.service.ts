@@ -757,4 +757,91 @@ export class AdminService {
       throw new Error('Потрібно вказати або sendToAll=true, або список userIds');
     }
   }
+
+  async exportUsersToCSV(filters?: { tariff?: string; faculty?: string; curatorId?: string; role?: string }) {
+    // Будуємо фільтр для запиту
+    const query: any = {};
+    
+    if (filters?.tariff) {
+      query.tariff = filters.tariff;
+    }
+    
+    if (filters?.faculty) {
+      query.faculty = filters.faculty;
+    }
+    
+    if (filters?.curatorId) {
+      query.curatorId = filters.curatorId;
+    }
+    
+    if (filters?.role) {
+      if (filters.role === 'admin') {
+        query.isAdmin = true;
+      } else if (filters.role === 'curator') {
+        query.isCurator = true;
+      } else if (filters.role === 'student') {
+        query.isAdmin = false;
+        query.isCurator = false;
+      }
+    }
+
+    const users = await this.userModel.find(query).select('-password').sort({ createdAt: -1 });
+
+    // Отримуємо імена кураторів
+    const curatorIds = [...new Set(users.filter(u => u.curatorId).map(u => u.curatorId))];
+    const curators = await this.userModel.find({ _id: { $in: curatorIds } }).select('firstName lastName');
+    const curatorMap = new Map(curators.map(c => [c._id.toString(), `${c.firstName} ${c.lastName}`]));
+
+    // Формуємо CSV
+    const csvRows = [];
+    
+    // Заголовки
+    csvRows.push([
+      'Email',
+      'Ім\'я',
+      'Прізвище',
+      'Телефон/Telegram',
+      'Група',
+      'Тариф',
+      'Факультет',
+      'Доступ до',
+      'Куратор',
+      'Адмін',
+      'Куратор (роль)',
+      'Пройдено уроків',
+      'Пройдено модулів',
+      'Заробіток',
+      'Дата реєстрації'
+    ].join(','));
+
+    // Дані користувачів
+    for (const user of users) {
+      const curatorName = user.curatorId ? curatorMap.get(user.curatorId) || 'Не знайдено' : '-';
+      const accessUntil = user.accessUntil ? new Date(user.accessUntil).toLocaleDateString('uk-UA') : 'Безлімітний';
+      
+      csvRows.push([
+        user.email,
+        user.firstName,
+        user.lastName,
+        user.phoneOrTelegram || '-',
+        user.group || '-',
+        user.tariff || '-',
+        user.faculty || '-',
+        accessUntil,
+        curatorName,
+        user.isAdmin ? 'Так' : 'Ні',
+        user.isCurator ? 'Так' : 'Ні',
+        user.completedLessons?.length || 0,
+        user.completedModules?.length || 0,
+        user.earnings || 0,
+        new Date(user.createdAt).toLocaleDateString('uk-UA')
+      ].map(field => `"${field}"`).join(','));
+    }
+
+    return {
+      csv: csvRows.join('\n'),
+      filename: `users_export_${new Date().toISOString().split('T')[0]}.csv`,
+      totalUsers: users.length
+    };
+  }
 }

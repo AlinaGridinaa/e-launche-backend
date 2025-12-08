@@ -172,6 +172,17 @@ let AdminService = class AdminService {
             message: 'Пароль успішно змінено',
         };
     }
+    async deleteUser(userId) {
+        const user = await this.userModel.findById(userId);
+        if (!user) {
+            throw new common_1.NotFoundException('Користувача не знайдено');
+        }
+        await this.userModel.deleteOne({ _id: userId });
+        return {
+            success: true,
+            message: 'Користувача видалено',
+        };
+    }
     async assignFaculty(userId, faculty) {
         const user = await this.userModel.findById(userId);
         if (!user) {

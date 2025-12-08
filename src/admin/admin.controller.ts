@@ -1,4 +1,4 @@
-import { Controller, Get, Put, Post, Patch, Delete, Body, Param, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Put, Post, Patch, Delete, Body, Param, Query, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AdminService } from './admin.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -290,5 +290,15 @@ export class AdminController {
       body.sendToAll,
       body.userIds
     );
+  }
+
+  @Get('users/export')
+  async exportUsers(
+    @Query('tariff') tariff?: string,
+    @Query('faculty') faculty?: string,
+    @Query('curator') curatorId?: string,
+    @Query('role') role?: string,
+  ) {
+    return this.adminService.exportUsersToCSV({ tariff, faculty, curatorId, role });
   }
 }

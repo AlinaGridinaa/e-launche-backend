@@ -53,8 +53,8 @@ __decorate([
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "group", void 0);
 __decorate([
-    (0, class_validator_1.IsDateString)(),
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsDateString)(),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "accessUntil", void 0);
 __decorate([

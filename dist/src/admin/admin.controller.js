@@ -38,6 +38,9 @@ let AdminController = class AdminController {
     async changePassword(userId, password) {
         return this.adminService.changePassword(userId, password);
     }
+    async deleteUser(userId) {
+        return this.adminService.deleteUser(userId);
+    }
     async assignFaculty(userId, assignFacultyDto) {
         return this.adminService.assignFaculty(userId, assignFacultyDto.faculty);
     }
@@ -159,6 +162,13 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], AdminController.prototype, "changePassword", null);
+__decorate([
+    (0, common_1.Delete)('users/:userId'),
+    __param(0, (0, common_1.Param)('userId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "deleteUser", null);
 __decorate([
     (0, common_1.Put)('users/:userId/faculty'),
     __param(0, (0, common_1.Param)('userId')),
