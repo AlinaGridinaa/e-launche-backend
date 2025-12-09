@@ -34,6 +34,10 @@ export class CreateUserDto {
   @IsOptional()
   faculty?: string;
 
+  @IsString()
+  @IsOptional()
+  curatorId?: string; // ID куратора
+
   @IsBoolean()
   @IsOptional()
   isAdmin?: boolean;

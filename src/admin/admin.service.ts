@@ -98,6 +98,7 @@ export class AdminService {
     }
     if (updateData.tariff !== undefined) user.tariff = updateData.tariff;
     if (updateData.faculty !== undefined) user.faculty = updateData.faculty;
+    if (updateData.curatorId !== undefined) user.curatorId = updateData.curatorId;
 
     await user.save();
 
@@ -225,6 +226,7 @@ export class AdminService {
       accessUntil: createUserDto.accessUntil && createUserDto.accessUntil.trim() !== '' ? new Date(createUserDto.accessUntil) : undefined,
       tariff: createUserDto.tariff || null,
       faculty: createUserDto.faculty || null,
+      curatorId: createUserDto.curatorId || null,
       isAdmin: createUserDto.isAdmin || false,
       isCurator: createUserDto.isCurator || false,
       earnings: 0,
