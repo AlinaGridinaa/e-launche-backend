@@ -25,9 +25,9 @@ export declare class CuratorService {
         submittedAt: Date;
         reviewedAt: Date | undefined;
     }[]>;
-    reviewHomework(curatorId: string, homeworkId: string, score: number, feedback?: string): Promise<{
+    reviewHomework(curatorId: string, homeworkId: string, score?: number, feedback?: string): Promise<{
         id: import("mongoose").Types.ObjectId;
-        score: number;
+        score: number | undefined;
         feedback: string | undefined;
         status: "reviewed";
         reviewedAt: Date;

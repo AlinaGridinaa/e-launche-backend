@@ -19,11 +19,11 @@ export declare class CuratorController {
         reviewedAt: Date | undefined;
     }[]>;
     reviewHomework(req: any, homeworkId: string, reviewDto: {
-        score: number;
+        score?: number;
         feedback?: string;
     }): Promise<{
         id: import("mongoose").Types.ObjectId;
-        score: number;
+        score: number | undefined;
         feedback: string | undefined;
         status: "reviewed";
         reviewedAt: Date;

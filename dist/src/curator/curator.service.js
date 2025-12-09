@@ -73,15 +73,20 @@ let CuratorService = class CuratorService {
             ? `${module.title} - Урок ${homework.lessonNumber}`
             : `Урок ${homework.lessonNumber}`;
         homework.curatorId = curatorId;
-        homework.score = score;
+        if (score !== undefined && score !== null) {
+            homework.score = score;
+        }
         homework.feedback = feedback;
         homework.status = 'reviewed';
         homework.reviewedAt = new Date();
         await homework.save();
         try {
+            const notificationBody = score !== undefined && score !== null
+                ? `${lessonTitle}: оцінка ${score}/100`
+                : `${lessonTitle}: перевірено`;
             await this.notificationsService.sendNotificationToUser(homework.userId, {
                 title: '✅ Домашнє завдання перевірено',
-                body: `${lessonTitle}: оцінка ${score}/100`,
+                body: notificationBody,
                 icon: '/icons/icon-192.png',
                 badge: '/icons/icon-192.png',
                 data: {

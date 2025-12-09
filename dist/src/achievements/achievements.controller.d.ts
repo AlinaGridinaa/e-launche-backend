@@ -24,6 +24,11 @@ export declare class AchievementsController {
             category: "sales" | "content" | "progress" | "social";
         }[];
     }>;
+    uploadProof(req: any, file: Express.Multer.File): Promise<{
+        success: boolean;
+        fileUrl: string;
+        message: string;
+    }>;
     submitAchievement(req: any, dto: SubmitAchievementDto): Promise<{
         success: boolean;
         data: import("mongoose").Document<unknown, {}, import("../schemas/achievement.schema").UserAchievementDocument, {}, {}> & import("../schemas/achievement.schema").UserAchievement & import("mongoose").Document<import("mongoose").Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
