@@ -8,6 +8,7 @@ export declare class CreateUserDto {
     accessUntil?: string;
     tariff?: string;
     faculty?: string;
+    curatorId?: string;
     isAdmin?: boolean;
     isCurator?: boolean;
 }

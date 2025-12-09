@@ -58,7 +58,7 @@ export class CuratorService {
   async reviewHomework(
     curatorId: string,
     homeworkId: string,
-    score: number,
+    score?: number,
     feedback?: string,
   ) {
     const homework = await this.homeworkModel.findById(homeworkId);
@@ -79,7 +79,9 @@ export class CuratorService {
       : `Урок ${homework.lessonNumber}`;
 
     homework.curatorId = curatorId;
-    homework.score = score;
+    if (score !== undefined && score !== null) {
+      homework.score = score;
+    }
     homework.feedback = feedback;
     homework.status = 'reviewed';
     homework.reviewedAt = new Date();
@@ -88,9 +90,13 @@ export class CuratorService {
 
     // Відправити пуш-нотифікацію студенту
     try {
+      const notificationBody = score !== undefined && score !== null
+        ? `${lessonTitle}: оцінка ${score}/100`
+        : `${lessonTitle}: перевірено`;
+      
       await this.notificationsService.sendNotificationToUser(homework.userId, {
         title: '✅ Домашнє завдання перевірено',
-        body: `${lessonTitle}: оцінка ${score}/100`,
+        body: notificationBody,
         icon: '/icons/icon-192.png',
         badge: '/icons/icon-192.png',
         data: { 

@@ -247,4 +247,14 @@ export declare class AdminService {
         sent: number;
         failed: number;
     }>;
+    exportUsersToCSV(filters?: {
+        tariff?: string;
+        faculty?: string;
+        curatorId?: string;
+        role?: string;
+    }): Promise<{
+        csv: string;
+        filename: string;
+        totalUsers: number;
+    }>;
 }

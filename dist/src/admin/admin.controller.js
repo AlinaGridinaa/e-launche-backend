@@ -131,6 +131,9 @@ let AdminController = class AdminController {
     async sendCustomNotification(body) {
         return this.adminService.sendCustomNotification(body.title, body.message, body.url, body.sendToAll, body.userIds);
     }
+    async exportUsers(tariff, faculty, curatorId, role) {
+        return this.adminService.exportUsersToCSV({ tariff, faculty, curatorId, role });
+    }
 };
 exports.AdminController = AdminController;
 __decorate([
@@ -381,6 +384,16 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AdminController.prototype, "sendCustomNotification", null);
+__decorate([
+    (0, common_1.Get)('users/export'),
+    __param(0, (0, common_1.Query)('tariff')),
+    __param(1, (0, common_1.Query)('faculty')),
+    __param(2, (0, common_1.Query)('curator')),
+    __param(3, (0, common_1.Query)('role')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String, String]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "exportUsers", null);
 exports.AdminController = AdminController = __decorate([
     (0, common_1.Controller)('admin'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),

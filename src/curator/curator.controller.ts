@@ -17,7 +17,7 @@ export class CuratorController {
   async reviewHomework(
     @Request() req,
     @Param('homeworkId') homeworkId: string,
-    @Body() reviewDto: { score: number; feedback?: string },
+    @Body() reviewDto: { score?: number; feedback?: string },
   ) {
     const curatorId = req.user._id.toString();
     return this.curatorService.reviewHomework(

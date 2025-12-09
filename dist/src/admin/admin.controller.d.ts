@@ -255,4 +255,9 @@ export declare class AdminController {
         sent: number;
         failed: number;
     }>;
+    exportUsers(tariff?: string, faculty?: string, curatorId?: string, role?: string): Promise<{
+        csv: string;
+        filename: string;
+        totalUsers: number;
+    }>;
 }

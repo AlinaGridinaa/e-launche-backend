@@ -143,6 +143,8 @@ let AdminService = class AdminService {
             user.tariff = updateData.tariff;
         if (updateData.faculty !== undefined)
             user.faculty = updateData.faculty;
+        if (updateData.curatorId !== undefined)
+            user.curatorId = updateData.curatorId;
         await user.save();
         return {
             id: user._id,
@@ -244,6 +246,7 @@ let AdminService = class AdminService {
             accessUntil: createUserDto.accessUntil && createUserDto.accessUntil.trim() !== '' ? new Date(createUserDto.accessUntil) : undefined,
             tariff: createUserDto.tariff || null,
             faculty: createUserDto.faculty || null,
+            curatorId: createUserDto.curatorId || null,
             isAdmin: createUserDto.isAdmin || false,
             isCurator: createUserDto.isCurator || false,
             earnings: 0,
@@ -624,6 +627,79 @@ let AdminService = class AdminService {
         else {
             throw new Error('Потрібно вказати або sendToAll=true, або список userIds');
         }
+    }
+    async exportUsersToCSV(filters) {
+        const query = {};
+        if (filters?.tariff) {
+            query.tariff = filters.tariff;
+        }
+        if (filters?.faculty) {
+            query.faculty = filters.faculty;
+        }
+        if (filters?.curatorId) {
+            query.curatorId = filters.curatorId;
+        }
+        if (filters?.role) {
+            if (filters.role === 'admin') {
+                query.isAdmin = true;
+            }
+            else if (filters.role === 'curator') {
+                query.isCurator = true;
+            }
+            else if (filters.role === 'student') {
+                query.isAdmin = false;
+                query.isCurator = false;
+            }
+        }
+        const users = await this.userModel.find(query).select('-password').sort({ createdAt: -1 });
+        const curatorIds = [...new Set(users.filter(u => u.curatorId).map(u => u.curatorId))];
+        const curators = await this.userModel.find({ _id: { $in: curatorIds } }).select('firstName lastName');
+        const curatorMap = new Map(curators.map(c => [c._id.toString(), `${c.firstName} ${c.lastName}`]));
+        const csvRows = [];
+        csvRows.push([
+            'Email',
+            'Ім\'я',
+            'Прізвище',
+            'Телефон/Telegram',
+            'Група',
+            'Тариф',
+            'Факультет',
+            'Доступ до',
+            'Куратор',
+            'Адмін',
+            'Куратор (роль)',
+            'Пройдено уроків',
+            'Пройдено модулів',
+            'Заробіток',
+            'Дата реєстрації'
+        ].join(','));
+        for (const user of users) {
+            const curatorName = user.curatorId ? curatorMap.get(user.curatorId) || 'Не знайдено' : '-';
+            const accessUntil = user.accessUntil ? new Date(user.accessUntil).toLocaleDateString('uk-UA') : 'Безлімітний';
+            const createdAt = user.createdAt ? new Date(user.createdAt).toLocaleDateString('uk-UA') : '-';
+            csvRows.push([
+                user.email,
+                user.firstName,
+                user.lastName,
+                user.phoneOrTelegram || '-',
+                user.group || '-',
+                user.tariff || '-',
+                user.faculty || '-',
+                accessUntil,
+                curatorName,
+                user.isAdmin ? 'Так' : 'Ні',
+                user.isCurator ? 'Так' : 'Ні',
+                user.completedLessons?.length || 0,
+                user.completedModules?.length || 0,
+                user.earnings || 0,
+                createdAt
+            ].map(field => `"${field}"`).join(','));
+        }
+        return {
+            csv: csvRows.join('\n'),
+            filename: `users_export_${new Date().toISOString().split('T')[0]}.csv`,
+            totalUsers: users.length
+        };
     }
 };
 exports.AdminService = AdminService;

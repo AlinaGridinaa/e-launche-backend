@@ -21,6 +21,7 @@ class CreateUserDto {
     accessUntil;
     tariff;
     faculty;
+    curatorId;
     isAdmin;
     isCurator;
 }
@@ -67,6 +68,11 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "faculty", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateUserDto.prototype, "curatorId", void 0);
 __decorate([
     (0, class_validator_1.IsBoolean)(),
     (0, class_validator_1.IsOptional)(),
