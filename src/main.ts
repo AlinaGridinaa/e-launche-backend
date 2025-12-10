@@ -33,9 +33,25 @@ async function bootstrap() {
     prefix: '/uploads/',
   });
   
-  // CORS
+  // CORS - підтримка декількох доменів
+  const allowedOrigins = [
+    'http://localhost:3000',
+    'https://hogwarts-frontend.vercel.app',
+    process.env.FRONTEND_URL,
+  ].filter(Boolean);
+
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: (origin, callback) => {
+      // Дозволити запити без origin (мобільні додатки, Postman)
+      if (!origin) return callback(null, true);
+      
+      if (allowedOrigins.some(allowed => origin.startsWith(allowed as string))) {
+        callback(null, true);
+      } else {
+        console.warn(`⚠️ CORS blocked request from: ${origin}`);
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],

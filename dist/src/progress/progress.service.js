@@ -49,12 +49,30 @@ let ProgressService = class ProgressService {
                 usefulnessRating,
             });
         }
+        await this.checkAndCompleteModule(user, moduleId);
         await user.save();
         return {
             success: true,
             message: 'Урок позначено як завершений',
             completedLessons: user.completedLessons.length,
         };
+    }
+    async checkAndCompleteModule(user, moduleId) {
+        const module = await this.moduleModel.findById(moduleId).exec();
+        if (!module)
+            return;
+        const completedLessonsInModule = user.completedLessons?.filter((lesson) => lesson.moduleId === moduleId).length || 0;
+        if (completedLessonsInModule === module.lessons.length) {
+            if (!user.completedModules) {
+                user.completedModules = [];
+            }
+            if (!user.completedModules.includes(moduleId)) {
+                user.completedModules.push(moduleId);
+                const newLevel = (0, avatars_config_1.getLevelByCompletedModules)(user.completedModules.length);
+                user.currentAvatarLevel = newLevel;
+                user.avatarUrl = (0, avatars_config_1.getAvatarForLevel)(newLevel);
+            }
+        }
     }
     async uncompleteLesson(userId, moduleId, lessonNumber) {
         const user = await this.userModel.findById(userId).exec();

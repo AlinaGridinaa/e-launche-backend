@@ -8,6 +8,7 @@ export declare class ProgressService {
         message: string;
         completedLessons: number;
     }>;
+    private checkAndCompleteModule;
     uncompleteLesson(userId: string, moduleId: string, lessonNumber: number): Promise<{
         success: boolean;
         message: string;

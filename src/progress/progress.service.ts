@@ -51,6 +51,9 @@ export class ProgressService {
       });
     }
 
+    // Перевіряємо чи всі уроки модуля завершені
+    await this.checkAndCompleteModule(user, moduleId);
+
     await user.save();
 
     return {
@@ -58,6 +61,33 @@ export class ProgressService {
       message: 'Урок позначено як завершений',
       completedLessons: user.completedLessons.length,
     };
+  }
+
+  private async checkAndCompleteModule(user: any, moduleId: string) {
+    // Отримуємо модуль щоб дізнатися скільки в ньому уроків
+    const module = await this.moduleModel.findById(moduleId).exec();
+    if (!module) return;
+
+    // Рахуємо скільки уроків цього модуля завершено
+    const completedLessonsInModule = user.completedLessons?.filter(
+      (lesson: any) => lesson.moduleId === moduleId
+    ).length || 0;
+
+    // Якщо всі уроки завершені і модуль ще не в списку завершених
+    if (completedLessonsInModule === module.lessons.length) {
+      if (!user.completedModules) {
+        user.completedModules = [];
+      }
+      
+      if (!user.completedModules.includes(moduleId)) {
+        user.completedModules.push(moduleId);
+        
+        // Оновлюємо рівень аватара
+        const newLevel = getLevelByCompletedModules(user.completedModules.length);
+        user.currentAvatarLevel = newLevel;
+        user.avatarUrl = getAvatarForLevel(newLevel);
+      }
+    }
   }
 
   async uncompleteLesson(userId: string, moduleId: string, lessonNumber: number) {
