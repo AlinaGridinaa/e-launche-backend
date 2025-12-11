@@ -57,6 +57,8 @@ export async function uploadBufferToCloudinary(
         if (error) {
           console.error('Cloudinary upload stream error:', error);
           reject(error);
+        } else if (!result) {
+          reject(new Error('Upload failed: no result returned'));
         } else {
           resolve(result.secure_url);
         }
