@@ -1,4 +1,4 @@
-import { diskStorage } from 'multer';
+import { diskStorage, memoryStorage } from 'multer';
 import { extname } from 'path';
 
 export const avatarStorage = diskStorage({
@@ -25,15 +25,11 @@ export const audioFileFilter = (req, file, callback) => {
   callback(null, true);
 };
 
+// Використовуємо memoryStorage для аудіо (зберігаємо в пам'яті, не на диску)
 export const multerConfig = {
-  storage: diskStorage({
-    destination: './uploads/audio-feedback',
-    filename: (req, file, callback) => {
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-      const ext = extname(file.originalname);
-      const filename = `audio-${uniqueSuffix}${ext}`;
-      callback(null, filename);
-    },
-  }),
+  storage: memoryStorage(),
   fileFilter: audioFileFilter,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB max
+  },
 };

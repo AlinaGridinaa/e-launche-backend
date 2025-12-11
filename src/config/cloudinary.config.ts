@@ -36,6 +36,38 @@ export async function uploadToCloudinary(
 }
 
 /**
+ * Завантажує файл з buffer (пам'яті) на Cloudinary
+ * @param buffer - Buffer файлу
+ * @param folder - Папка в Cloudinary
+ * @param resourceType - Тип ресурсу (image, video, raw)
+ * @returns Публічний URL завантаженого файлу
+ */
+export async function uploadBufferToCloudinary(
+  buffer: Buffer,
+  folder: string = 'audio-feedback',
+  resourceType: 'image' | 'video' | 'raw' = 'video',
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: `hogwarts/${folder}`,
+        resource_type: resourceType,
+      },
+      (error, result) => {
+        if (error) {
+          console.error('Cloudinary upload stream error:', error);
+          reject(error);
+        } else {
+          resolve(result.secure_url);
+        }
+      },
+    );
+    
+    uploadStream.end(buffer);
+  });
+}
+
+/**
  * Видаляє файл з Cloudinary
  * @param publicId - Public ID файлу в Cloudinary
  */

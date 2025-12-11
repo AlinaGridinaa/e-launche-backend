@@ -18,7 +18,10 @@ export class CuratorController {
   @Post('homeworks/upload-audio')
   @UseInterceptors(FileInterceptor('audio', multerConfig))
   async uploadAudio(@UploadedFile() file: Express.Multer.File) {
-    return this.curatorService.uploadAudioFeedback(file.path);
+    if (!file || !file.buffer) {
+      throw new Error('Файл не завантажено');
+    }
+    return this.curatorService.uploadAudioFeedback(file.buffer);
   }
 
   @Put('homeworks/:homeworkId/review')

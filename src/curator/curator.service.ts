@@ -5,7 +5,7 @@ import { Homework, HomeworkDocument } from '../schemas/homework.schema';
 import { User, UserDocument } from '../schemas/user.schema';
 import { Module as ModuleEntity, ModuleDocument } from '../schemas/module.schema';
 import { NotificationsService } from '../notifications/notifications.service';
-import { uploadToCloudinary } from '../config/cloudinary.config';
+import { uploadBufferToCloudinary } from '../config/cloudinary.config';
 
 @Injectable()
 export class CuratorService {
@@ -57,15 +57,15 @@ export class CuratorService {
   }
 
   // Завантажити аудіо фідбек в Cloudinary
-  async uploadAudioFeedback(filePath: string): Promise<{ audioUrl: string }> {
+  async uploadAudioFeedback(buffer: Buffer): Promise<{ audioUrl: string }> {
     try {
-      console.log('Uploading audio from:', filePath);
-      const audioUrl = await uploadToCloudinary(filePath, 'audio-feedback');
+      console.log('Uploading audio buffer, size:', buffer.length, 'bytes');
+      const audioUrl = await uploadBufferToCloudinary(buffer, 'audio-feedback', 'video');
       console.log('Audio uploaded successfully:', audioUrl);
       return { audioUrl };
     } catch (error) {
       console.error('Failed to upload audio to Cloudinary:', error);
-      console.error('File path:', filePath);
+      console.error('Buffer size:', buffer.length);
       console.error('Error details:', error.message);
       throw new Error(`Не вдалося завантажити аудіо: ${error.message}`);
     }
