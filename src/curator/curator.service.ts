@@ -59,11 +59,15 @@ export class CuratorService {
   // Завантажити аудіо фідбек в Cloudinary
   async uploadAudioFeedback(filePath: string): Promise<{ audioUrl: string }> {
     try {
+      console.log('Uploading audio from:', filePath);
       const audioUrl = await uploadToCloudinary(filePath, 'audio-feedback');
+      console.log('Audio uploaded successfully:', audioUrl);
       return { audioUrl };
     } catch (error) {
       console.error('Failed to upload audio to Cloudinary:', error);
-      throw new Error('Не вдалося завантажити аудіо');
+      console.error('File path:', filePath);
+      console.error('Error details:', error.message);
+      throw new Error(`Не вдалося завантажити аудіо: ${error.message}`);
     }
   }
 

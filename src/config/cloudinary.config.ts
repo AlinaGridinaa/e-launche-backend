@@ -20,9 +20,12 @@ export async function uploadToCloudinary(
   folder: string = 'avatars',
 ): Promise<string> {
   try {
+    // Визначаємо тип ресурсу на основі папки
+    const resourceType = folder === 'audio-feedback' ? 'video' : 'image';
+    
     const result = await cloudinary.uploader.upload(filePath, {
       folder: `hogwarts/${folder}`,
-      resource_type: 'image',
+      resource_type: resourceType,
     });
     
     return result.secure_url;
