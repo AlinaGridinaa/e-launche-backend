@@ -5,6 +5,7 @@ import { Homework, HomeworkDocument } from '../schemas/homework.schema';
 import { User, UserDocument } from '../schemas/user.schema';
 import { Module as ModuleEntity, ModuleDocument } from '../schemas/module.schema';
 import { NotificationsService } from '../notifications/notifications.service';
+import { uploadToCloudinary } from '../config/cloudinary.config';
 
 @Injectable()
 export class CuratorService {
@@ -45,6 +46,7 @@ export class CuratorService {
           status: homework.status,
           score: homework.score,
           feedback: homework.feedback,
+          audioFeedback: homework.audioFeedback,
           submittedAt: homework.submittedAt,
           reviewedAt: homework.reviewedAt,
         };
@@ -54,12 +56,24 @@ export class CuratorService {
     return enrichedHomeworks;
   }
 
+  // Завантажити аудіо фідбек в Cloudinary
+  async uploadAudioFeedback(filePath: string): Promise<{ audioUrl: string }> {
+    try {
+      const audioUrl = await uploadToCloudinary(filePath, 'audio-feedback');
+      return { audioUrl };
+    } catch (error) {
+      console.error('Failed to upload audio to Cloudinary:', error);
+      throw new Error('Не вдалося завантажити аудіо');
+    }
+  }
+
   // Перевірити домашнє завдання
   async reviewHomework(
     curatorId: string,
     homeworkId: string,
     score?: number,
     feedback?: string,
+    audioFeedback?: string,
   ) {
     const homework = await this.homeworkModel.findById(homeworkId);
     if (!homework) {
@@ -83,6 +97,7 @@ export class CuratorService {
       homework.score = score;
     }
     homework.feedback = feedback;
+    homework.audioFeedback = audioFeedback;
     homework.status = 'reviewed';
     homework.reviewedAt = new Date();
 
@@ -113,6 +128,7 @@ export class CuratorService {
       id: homework._id,
       score: homework.score,
       feedback: homework.feedback,
+      audioFeedback: homework.audioFeedback,
       status: homework.status,
       reviewedAt: homework.reviewedAt,
     };
@@ -123,6 +139,7 @@ export class CuratorService {
     curatorId: string,
     homeworkId: string,
     feedback: string,
+    audioFeedback?: string,
   ) {
     const homework = await this.homeworkModel.findById(homeworkId);
     if (!homework) {
@@ -143,6 +160,7 @@ export class CuratorService {
 
     homework.curatorId = curatorId;
     homework.feedback = feedback;
+    homework.audioFeedback = audioFeedback;
     homework.status = 'needs_revision';
     homework.reviewedAt = new Date();
     homework.score = undefined; // Скидаємо оцінку
@@ -169,6 +187,7 @@ export class CuratorService {
     return {
       id: homework._id,
       feedback: homework.feedback,
+      audioFeedback: homework.audioFeedback,
       status: homework.status,
       reviewedAt: homework.reviewedAt,
     };

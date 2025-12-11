@@ -33,6 +33,9 @@ export class Homework {
   feedback?: string; // Коментар куратора
 
   @Prop()
+  audioFeedback?: string; // URL голосового коментаря куратора
+
+  @Prop()
   reviewedAt?: Date; // Коли було перевірено
 
   @Prop({ default: Date.now })

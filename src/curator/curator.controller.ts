@@ -1,6 +1,8 @@
-import { Controller, Get, Put, Body, Param, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Put, Body, Param, UseGuards, Request, Post, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { CuratorService } from './curator.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { multerConfig } from '../config/multer.config';
 
 @Controller('curator')
 @UseGuards(JwtAuthGuard)
@@ -13,11 +15,17 @@ export class CuratorController {
     return this.curatorService.getHomeworksForCurator(curatorId);
   }
 
+  @Post('homeworks/upload-audio')
+  @UseInterceptors(FileInterceptor('audio', multerConfig))
+  async uploadAudio(@UploadedFile() file: Express.Multer.File) {
+    return this.curatorService.uploadAudioFeedback(file.path);
+  }
+
   @Put('homeworks/:homeworkId/review')
   async reviewHomework(
     @Request() req,
     @Param('homeworkId') homeworkId: string,
-    @Body() reviewDto: { score?: number; feedback?: string },
+    @Body() reviewDto: { score?: number; feedback?: string; audioFeedback?: string },
   ) {
     const curatorId = req.user._id.toString();
     return this.curatorService.reviewHomework(
@@ -25,6 +33,7 @@ export class CuratorController {
       homeworkId,
       reviewDto.score,
       reviewDto.feedback,
+      reviewDto.audioFeedback,
     );
   }
 
@@ -32,13 +41,14 @@ export class CuratorController {
   async returnForRevision(
     @Request() req,
     @Param('homeworkId') homeworkId: string,
-    @Body() returnDto: { feedback: string },
+    @Body() returnDto: { feedback: string; audioFeedback?: string },
   ) {
     const curatorId = req.user._id.toString();
     return this.curatorService.returnForRevision(
       curatorId,
       homeworkId,
       returnDto.feedback,
+      returnDto.audioFeedback,
     );
   }
 
