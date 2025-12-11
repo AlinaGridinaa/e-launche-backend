@@ -57,6 +57,7 @@ let ProfileService = class ProfileService {
         const avatarUrl = (0, avatars_config_1.getAvatarForLevel)(modulesCompleted);
         const userObject = user.toObject();
         userObject.avatarUrl = avatarUrl;
+        userObject.currentAvatarLevel = modulesCompleted;
         return {
             user: userObject,
             stats,

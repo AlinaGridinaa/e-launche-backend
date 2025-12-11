@@ -218,6 +218,7 @@ export declare class AdminController {
     setAvatarLevel(level: number, body: {
         imageUrl: string;
         description?: string;
+        text?: string;
     }): Promise<import("mongoose").Document<unknown, {}, import("../schemas/avatar-level.schema").AvatarLevelDocument, {}, {}> & import("../schemas/avatar-level.schema").AvatarLevel & import("mongoose").Document<import("mongoose").Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
         _id: import("mongoose").Types.ObjectId;
     }> & {
@@ -230,7 +231,7 @@ export declare class AdminController {
         message: string;
         count: number;
     }>;
-    uploadAvatarImage(level: number, file: Express.Multer.File, description?: string): Promise<import("mongoose").Document<unknown, {}, import("../schemas/avatar-level.schema").AvatarLevelDocument, {}, {}> & import("../schemas/avatar-level.schema").AvatarLevel & import("mongoose").Document<import("mongoose").Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+    uploadAvatarImage(level: number, file: Express.Multer.File, description?: string, text?: string): Promise<import("mongoose").Document<unknown, {}, import("../schemas/avatar-level.schema").AvatarLevelDocument, {}, {}> & import("../schemas/avatar-level.schema").AvatarLevel & import("mongoose").Document<import("mongoose").Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
         _id: import("mongoose").Types.ObjectId;
     }> & {
         __v: number;

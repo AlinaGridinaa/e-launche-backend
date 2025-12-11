@@ -15,6 +15,7 @@ let AvatarLevel = class AvatarLevel {
     level;
     imageUrl;
     description;
+    text;
 };
 exports.AvatarLevel = AvatarLevel;
 __decorate([
@@ -29,6 +30,10 @@ __decorate([
     (0, mongoose_1.Prop)(),
     __metadata("design:type", String)
 ], AvatarLevel.prototype, "description", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], AvatarLevel.prototype, "text", void 0);
 exports.AvatarLevel = AvatarLevel = __decorate([
     (0, mongoose_1.Schema)()
 ], AvatarLevel);

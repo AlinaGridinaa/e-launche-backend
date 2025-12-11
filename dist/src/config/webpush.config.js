@@ -37,6 +37,8 @@ exports.vapidKeys = exports.webpush = void 0;
 exports.generateVapidKeys = generateVapidKeys;
 const webpush = __importStar(require("web-push"));
 exports.webpush = webpush;
+const dotenv_1 = require("dotenv");
+(0, dotenv_1.config)();
 const vapidKeys = {
     publicKey: process.env.VAPID_PUBLIC_KEY || '',
     privateKey: process.env.VAPID_PRIVATE_KEY || '',

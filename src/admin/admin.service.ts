@@ -607,7 +607,7 @@ export class AdminService {
     return avatar;
   }
 
-  async setAvatarLevel(level: number, imageUrl: string, description?: string) {
+  async setAvatarLevel(level: number, imageUrl: string, description?: string, text?: string) {
     const existingAvatar = await this.avatarLevelModel.findOne({ level });
 
     if (existingAvatar) {
@@ -615,6 +615,9 @@ export class AdminService {
       existingAvatar.imageUrl = imageUrl;
       if (description !== undefined) {
         existingAvatar.description = description;
+      }
+      if (text !== undefined) {
+        existingAvatar.text = text;
       }
       await existingAvatar.save();
       
@@ -628,6 +631,7 @@ export class AdminService {
         level,
         imageUrl,
         description,
+        text,
       });
       
       // Оновлюємо кеш

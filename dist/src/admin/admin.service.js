@@ -521,12 +521,15 @@ let AdminService = class AdminService {
         }
         return avatar;
     }
-    async setAvatarLevel(level, imageUrl, description) {
+    async setAvatarLevel(level, imageUrl, description, text) {
         const existingAvatar = await this.avatarLevelModel.findOne({ level });
         if (existingAvatar) {
             existingAvatar.imageUrl = imageUrl;
             if (description !== undefined) {
                 existingAvatar.description = description;
+            }
+            if (text !== undefined) {
+                existingAvatar.text = text;
             }
             await existingAvatar.save();
             await this.loadAvatarsToCache();
@@ -537,6 +540,7 @@ let AdminService = class AdminService {
                 level,
                 imageUrl,
                 description,
+                text,
             });
             await this.loadAvatarsToCache();
             return newAvatar;

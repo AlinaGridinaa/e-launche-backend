@@ -4,6 +4,7 @@ export declare class AvatarLevel {
     level: number;
     imageUrl: string;
     description?: string;
+    text?: string;
 }
 export declare const AvatarLevelSchema: import("mongoose").Schema<AvatarLevel, import("mongoose").Model<AvatarLevel, any, any, any, Document<unknown, any, AvatarLevel, any, {}> & AvatarLevel & {
     _id: import("mongoose").Types.ObjectId;

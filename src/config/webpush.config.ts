@@ -1,4 +1,8 @@
 import * as webpush from 'web-push';
+import { config } from 'dotenv';
+
+// Завантажуємо .env файл явно
+config();
 
 // VAPID ключі для Web Push
 // Згенеруйте нові ключі командою: npx web-push generate-vapid-keys

@@ -27,6 +27,7 @@ const curator_module_1 = require("./curator/curator.module");
 const homework_module_1 = require("./homework/homework.module");
 const achievements_module_1 = require("./achievements/achievements.module");
 const notifications_module_1 = require("./notifications/notifications.module");
+const avatars_module_1 = require("./avatars/avatars.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -63,6 +64,7 @@ exports.AppModule = AppModule = __decorate([
             homework_module_1.HomeworkModule,
             achievements_module_1.AchievementsModule,
             notifications_module_1.NotificationsModule,
+            avatars_module_1.AvatarsModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

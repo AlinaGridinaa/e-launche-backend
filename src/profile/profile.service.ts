@@ -54,6 +54,7 @@ export class ProfileService {
     const avatarUrl = getAvatarForLevel(modulesCompleted);
     const userObject = user.toObject();
     userObject.avatarUrl = avatarUrl;
+    userObject.currentAvatarLevel = modulesCompleted;
 
     return {
       user: userObject,

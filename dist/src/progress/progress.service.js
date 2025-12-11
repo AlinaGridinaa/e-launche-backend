@@ -17,11 +17,14 @@ const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
 const user_schema_1 = require("../schemas/user.schema");
+const module_schema_1 = require("../schemas/module.schema");
 const avatars_config_1 = require("../config/avatars.config");
 let ProgressService = class ProgressService {
     userModel;
-    constructor(userModel) {
+    moduleModel;
+    constructor(userModel, moduleModel) {
         this.userModel = userModel;
+        this.moduleModel = moduleModel;
     }
     async completeLesson(userId, moduleId, lessonNumber, moodRating, usefulnessRating) {
         const user = await this.userModel.findById(userId).exec();
@@ -124,6 +127,8 @@ exports.ProgressService = ProgressService;
 exports.ProgressService = ProgressService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, mongoose_1.InjectModel)(user_schema_1.User.name)),
-    __metadata("design:paramtypes", [mongoose_2.Model])
+    __param(1, (0, mongoose_1.InjectModel)(module_schema_1.Module.name)),
+    __metadata("design:paramtypes", [mongoose_2.Model,
+        mongoose_2.Model])
 ], ProgressService);
 //# sourceMappingURL=progress.service.js.map

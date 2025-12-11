@@ -13,6 +13,9 @@ export class AvatarLevel {
 
   @Prop()
   description?: string;
+
+  @Prop()
+  text?: string; // Текст який відображається поруч з аватаром
 }
 
 export const AvatarLevelSchema = SchemaFactory.createForClass(AvatarLevel);

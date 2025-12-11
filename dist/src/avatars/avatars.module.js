@@ -6,27 +6,22 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ProgressModule = void 0;
+exports.AvatarsModule = void 0;
 const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
-const progress_controller_1 = require("./progress.controller");
-const progress_service_1 = require("./progress.service");
-const user_schema_1 = require("../schemas/user.schema");
-const module_schema_1 = require("../schemas/module.schema");
-let ProgressModule = class ProgressModule {
+const avatars_controller_1 = require("./avatars.controller");
+const avatar_level_schema_1 = require("../schemas/avatar-level.schema");
+let AvatarsModule = class AvatarsModule {
 };
-exports.ProgressModule = ProgressModule;
-exports.ProgressModule = ProgressModule = __decorate([
+exports.AvatarsModule = AvatarsModule;
+exports.AvatarsModule = AvatarsModule = __decorate([
     (0, common_1.Module)({
         imports: [
             mongoose_1.MongooseModule.forFeature([
-                { name: user_schema_1.User.name, schema: user_schema_1.UserSchema },
-                { name: module_schema_1.Module.name, schema: module_schema_1.ModuleSchema },
+                { name: avatar_level_schema_1.AvatarLevel.name, schema: avatar_level_schema_1.AvatarLevelSchema },
             ]),
         ],
-        controllers: [progress_controller_1.ProgressController],
-        providers: [progress_service_1.ProgressService],
-        exports: [progress_service_1.ProgressService],
+        controllers: [avatars_controller_1.AvatarsController],
     })
-], ProgressModule);
-//# sourceMappingURL=progress.module.js.map
+], AvatarsModule);
+//# sourceMappingURL=avatars.module.js.map

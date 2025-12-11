@@ -1,8 +1,10 @@
 import { Model } from 'mongoose';
 import { UserDocument } from '../schemas/user.schema';
+import { ModuleDocument } from '../schemas/module.schema';
 export declare class ProgressService {
     private userModel;
-    constructor(userModel: Model<UserDocument>);
+    private moduleModel;
+    constructor(userModel: Model<UserDocument>, moduleModel: Model<ModuleDocument>);
     completeLesson(userId: string, moduleId: string, lessonNumber: number, moodRating?: number, usefulnessRating?: number): Promise<{
         success: boolean;
         message: string;

@@ -108,7 +108,7 @@ let AdminController = class AdminController {
         return this.adminService.getAvatarLevel(+level);
     }
     async setAvatarLevel(level, body) {
-        return this.adminService.setAvatarLevel(+level, body.imageUrl, body.description);
+        return this.adminService.setAvatarLevel(+level, body.imageUrl, body.description, body.text);
     }
     async deleteAvatarLevel(level) {
         return this.adminService.deleteAvatarLevel(+level);
@@ -116,14 +116,14 @@ let AdminController = class AdminController {
     async initializeDefaultAvatars() {
         return this.adminService.initializeDefaultAvatars();
     }
-    async uploadAvatarImage(level, file, description) {
+    async uploadAvatarImage(level, file, description, text) {
         if (!file) {
             throw new Error('Файл не завантажено');
         }
         const imageUrl = await this.adminService.uploadAvatarToCloudinary(file.path);
         const fs = require('fs');
         fs.unlinkSync(file.path);
-        return this.adminService.setAvatarLevel(+level, imageUrl, description);
+        return this.adminService.setAvatarLevel(+level, imageUrl, description, text);
     }
     async getLessonRatings(moduleId) {
         return this.adminService.getLessonRatingsStatistics(moduleId);
@@ -366,8 +366,9 @@ __decorate([
     __param(0, (0, common_1.Param)('level')),
     __param(1, (0, common_1.UploadedFile)()),
     __param(2, (0, common_1.Body)('description')),
+    __param(3, (0, common_1.Body)('text')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, Object, String]),
+    __metadata("design:paramtypes", [Number, Object, String, String]),
     __metadata("design:returntype", Promise)
 ], AdminController.prototype, "uploadAvatarImage", null);
 __decorate([

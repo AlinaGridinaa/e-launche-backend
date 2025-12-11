@@ -221,7 +221,7 @@ export declare class AdminService {
     }> & {
         __v: number;
     }>;
-    setAvatarLevel(level: number, imageUrl: string, description?: string): Promise<import("mongoose").Document<unknown, {}, AvatarLevelDocument, {}, {}> & AvatarLevel & import("mongoose").Document<import("mongoose").Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+    setAvatarLevel(level: number, imageUrl: string, description?: string, text?: string): Promise<import("mongoose").Document<unknown, {}, AvatarLevelDocument, {}, {}> & AvatarLevel & import("mongoose").Document<import("mongoose").Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
         _id: import("mongoose").Types.ObjectId;
     }> & {
         __v: number;

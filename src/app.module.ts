@@ -18,6 +18,7 @@ import { CuratorModule } from './curator/curator.module';
 import { HomeworkModule } from './homework/homework.module';
 import { AchievementsModule } from './achievements/achievements.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { AvatarsModule } from './avatars/avatars.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { NotificationsModule } from './notifications/notifications.module';
     HomeworkModule,
     AchievementsModule,
     NotificationsModule,
+    AvatarsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

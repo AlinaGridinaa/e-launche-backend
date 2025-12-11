@@ -226,9 +226,9 @@ export class AdminController {
   @Put('avatars/:level')
   async setAvatarLevel(
     @Param('level') level: number,
-    @Body() body: { imageUrl: string; description?: string },
+    @Body() body: { imageUrl: string; description?: string; text?: string },
   ) {
-    return this.adminService.setAvatarLevel(+level, body.imageUrl, body.description);
+    return this.adminService.setAvatarLevel(+level, body.imageUrl, body.description, body.text);
   }
 
   @Delete('avatars/:level')
@@ -253,6 +253,7 @@ export class AdminController {
     @Param('level') level: number,
     @UploadedFile() file: Express.Multer.File,
     @Body('description') description?: string,
+    @Body('text') text?: string,
   ) {
     if (!file) {
       throw new Error('Файл не завантажено');
@@ -265,7 +266,7 @@ export class AdminController {
     const fs = require('fs');
     fs.unlinkSync(file.path);
     
-    return this.adminService.setAvatarLevel(+level, imageUrl, description);
+    return this.adminService.setAvatarLevel(+level, imageUrl, description, text);
   }
 
   @Get('lesson-ratings')
