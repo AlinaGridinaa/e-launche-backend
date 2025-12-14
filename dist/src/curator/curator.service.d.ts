@@ -19,29 +19,36 @@ export declare class CuratorService {
         lessonNumber: number;
         answer: string;
         attachments: string[];
-        status: "approved" | "needs_revision" | "pending" | "reviewed";
+        fileAttachments: string[];
+        status: "pending" | "reviewed" | "approved" | "needs_revision";
         score: number | undefined;
         feedback: string | undefined;
+        audioFeedback: string | undefined;
         submittedAt: Date;
         reviewedAt: Date | undefined;
     }[]>;
-    reviewHomework(curatorId: string, homeworkId: string, score?: number, feedback?: string): Promise<{
+    uploadAudioFeedback(buffer: Buffer): Promise<{
+        audioUrl: string;
+    }>;
+    reviewHomework(curatorId: string, homeworkId: string, score?: number, feedback?: string, audioFeedback?: string): Promise<{
         id: import("mongoose").Types.ObjectId;
         score: number | undefined;
         feedback: string | undefined;
+        audioFeedback: string | undefined;
         status: "reviewed";
         reviewedAt: Date;
     }>;
-    returnForRevision(curatorId: string, homeworkId: string, feedback: string): Promise<{
+    returnForRevision(curatorId: string, homeworkId: string, feedback: string, audioFeedback?: string): Promise<{
         id: import("mongoose").Types.ObjectId;
         feedback: string;
+        audioFeedback: string | undefined;
         status: "needs_revision";
         reviewedAt: Date;
     }>;
     getMyStudents(curatorId: string): Promise<{
         id: import("mongoose").Types.ObjectId;
         firstName: string;
-        lastName: string;
+        lastName: string | undefined;
         email: string;
         faculty: string | undefined;
         completedLessonsCount: number;

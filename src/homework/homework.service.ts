@@ -5,6 +5,7 @@ import { Homework } from '../schemas/homework.schema';
 import { User } from '../schemas/user.schema';
 import { Module as ModuleModel } from '../schemas/module.schema';
 import { SubmitHomeworkDto } from './dto/submit-homework.dto';
+import { uploadBufferToCloudinary } from '../config/cloudinary.config';
 
 @Injectable()
 export class HomeworkService {
@@ -14,7 +15,26 @@ export class HomeworkService {
     @InjectModel(ModuleModel.name) private moduleModel: Model<ModuleModel>,
   ) {}
 
-  async submitHomework(userId: string, dto: SubmitHomeworkDto) {
+  async submitHomework(userId: string, dto: any, files?: Express.Multer.File[]) {
+    // Парсимо attachments з JSON string якщо вони є
+    let attachments: string[] = [];
+    if (dto.attachments) {
+      try {
+        attachments = typeof dto.attachments === 'string' 
+          ? JSON.parse(dto.attachments) 
+          : dto.attachments;
+      } catch (error) {
+        console.error('Failed to parse attachments:', error);
+        attachments = [];
+      }
+    }
+
+    // Парсимо lessonNumber
+    const lessonNumber = parseInt(dto.lessonNumber, 10);
+    if (isNaN(lessonNumber)) {
+      throw new BadRequestException('lessonNumber повинен бути числом');
+    }
+
     // Перевіряємо чи користувач існує
     const user = await this.userModel.findById(userId);
     if (!user) {
@@ -27,17 +47,34 @@ export class HomeworkService {
       throw new NotFoundException('Модуль не знайдено');
     }
 
+    // Завантажуємо файли в Cloudinary якщо вони є
+    let fileAttachments: string[] = [];
+    if (files && files.length > 0) {
+      try {
+        fileAttachments = await Promise.all(
+          files.map(file => 
+            uploadBufferToCloudinary(file.buffer, 'homework-files', 'raw')
+          )
+        );
+        console.log('Files uploaded successfully:', fileAttachments);
+      } catch (error) {
+        console.error('Failed to upload files:', error);
+        throw new BadRequestException(`Помилка завантаження файлів: ${error.message}`);
+      }
+    }
+
     // Перевіряємо чи вже існує подання для цього уроку
     const existingHomework = await this.homeworkModel.findOne({
       userId,
       moduleId: dto.moduleId,
-      lessonNumber: dto.lessonNumber,
+      lessonNumber: lessonNumber,
     });
 
     if (existingHomework) {
       // Оновлюємо існуюче подання
       existingHomework.answer = dto.answer;
-      existingHomework.attachments = dto.attachments || [];
+      existingHomework.attachments = attachments;
+      existingHomework.fileAttachments = fileAttachments;
       existingHomework.status = 'pending';
       existingHomework.submittedAt = new Date();
       existingHomework.curatorId = user.curatorId;
@@ -54,9 +91,10 @@ export class HomeworkService {
     const homework = new this.homeworkModel({
       userId,
       moduleId: dto.moduleId,
-      lessonNumber: dto.lessonNumber,
+      lessonNumber: lessonNumber,
       answer: dto.answer,
-      attachments: dto.attachments || [],
+      attachments: attachments,
+      fileAttachments: fileAttachments,
       status: 'pending',
       curatorId: user.curatorId,
       submittedAt: new Date(),

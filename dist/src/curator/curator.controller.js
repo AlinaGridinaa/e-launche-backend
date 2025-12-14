@@ -14,8 +14,10 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CuratorController = void 0;
 const common_1 = require("@nestjs/common");
+const platform_express_1 = require("@nestjs/platform-express");
 const curator_service_1 = require("./curator.service");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
+const multer_config_1 = require("../config/multer.config");
 let CuratorController = class CuratorController {
     curatorService;
     constructor(curatorService) {
@@ -25,13 +27,19 @@ let CuratorController = class CuratorController {
         const curatorId = req.user._id.toString();
         return this.curatorService.getHomeworksForCurator(curatorId);
     }
+    async uploadAudio(file) {
+        if (!file || !file.buffer) {
+            throw new Error('Файл не завантажено');
+        }
+        return this.curatorService.uploadAudioFeedback(file.buffer);
+    }
     async reviewHomework(req, homeworkId, reviewDto) {
         const curatorId = req.user._id.toString();
-        return this.curatorService.reviewHomework(curatorId, homeworkId, reviewDto.score, reviewDto.feedback);
+        return this.curatorService.reviewHomework(curatorId, homeworkId, reviewDto.score, reviewDto.feedback, reviewDto.audioFeedback);
     }
     async returnForRevision(req, homeworkId, returnDto) {
         const curatorId = req.user._id.toString();
-        return this.curatorService.returnForRevision(curatorId, homeworkId, returnDto.feedback);
+        return this.curatorService.returnForRevision(curatorId, homeworkId, returnDto.feedback, returnDto.audioFeedback);
     }
     async getMyStudents(req) {
         const curatorId = req.user._id.toString();
@@ -49,6 +57,14 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], CuratorController.prototype, "getHomeworks", null);
+__decorate([
+    (0, common_1.Post)('homeworks/upload-audio'),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('audio', multer_config_1.multerConfig)),
+    __param(0, (0, common_1.UploadedFile)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], CuratorController.prototype, "uploadAudio", null);
 __decorate([
     (0, common_1.Put)('homeworks/:homeworkId/review'),
     __param(0, (0, common_1.Request)()),

@@ -2,13 +2,12 @@ import { Model } from 'mongoose';
 import { Homework } from '../schemas/homework.schema';
 import { User } from '../schemas/user.schema';
 import { Module as ModuleModel } from '../schemas/module.schema';
-import { SubmitHomeworkDto } from './dto/submit-homework.dto';
 export declare class HomeworkService {
     private homeworkModel;
     private userModel;
     private moduleModel;
     constructor(homeworkModel: Model<Homework>, userModel: Model<User>, moduleModel: Model<ModuleModel>);
-    submitHomework(userId: string, dto: SubmitHomeworkDto): Promise<import("mongoose").Document<unknown, {}, Homework, {}, {}> & Homework & {
+    submitHomework(userId: string, dto: any, files?: Express.Multer.File[]): Promise<import("mongoose").Document<unknown, {}, Homework, {}, {}> & Homework & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;

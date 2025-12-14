@@ -9,7 +9,7 @@ export declare class AdminController {
         id: import("mongoose").Types.ObjectId;
         email: string;
         firstName: string;
-        lastName: string;
+        lastName: string | undefined;
         phoneOrTelegram: string | undefined;
         group: string | undefined;
         accessUntil: Date | undefined;
@@ -26,7 +26,7 @@ export declare class AdminController {
         id: import("mongoose").Types.ObjectId;
         email: string;
         firstName: string;
-        lastName: string;
+        lastName: string | undefined;
         phoneOrTelegram: string | undefined;
         group: string | undefined;
         accessUntil: Date | undefined;
@@ -40,7 +40,7 @@ export declare class AdminController {
         id: import("mongoose").Types.ObjectId;
         email: string;
         firstName: string;
-        lastName: string;
+        lastName: string | undefined;
         phoneOrTelegram: string | undefined;
         group: string | undefined;
         accessUntil: Date | undefined;
@@ -59,7 +59,7 @@ export declare class AdminController {
         id: import("mongoose").Types.ObjectId;
         email: string;
         firstName: string;
-        lastName: string;
+        lastName: string | undefined;
         faculty: string;
     }>;
     toggleAdmin(userId: string): Promise<{
@@ -76,7 +76,7 @@ export declare class AdminController {
     awardAchievement(userId: string, achievementDto: AwardAchievementDto): Promise<{
         id: import("mongoose").Types.ObjectId;
         firstName: string;
-        lastName: string;
+        lastName: string | undefined;
         achievements: {
             _id?: string;
             title: string;
@@ -88,7 +88,7 @@ export declare class AdminController {
     getUserAchievements(userId: string): Promise<{
         id: import("mongoose").Types.ObjectId;
         firstName: string;
-        lastName: string;
+        lastName: string | undefined;
         achievements: {
             _id?: string;
             title: string;

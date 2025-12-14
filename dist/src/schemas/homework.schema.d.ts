@@ -6,10 +6,12 @@ export declare class Homework {
     lessonNumber: number;
     answer: string;
     attachments: string[];
+    fileAttachments: string[];
     status: 'pending' | 'reviewed' | 'approved' | 'needs_revision';
     curatorId?: string;
     score?: number;
     feedback?: string;
+    audioFeedback?: string;
     reviewedAt?: Date;
     submittedAt: Date;
 }

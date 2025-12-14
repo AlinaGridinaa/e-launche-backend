@@ -12,8 +12,8 @@ export const avatarStorage = diskStorage({
 });
 
 export const imageFileFilter = (req, file, callback) => {
-  if (!file.originalname.match(/\.(jpg|jpeg|png|gif|webp)$/)) {
-    return callback(new Error('Тільки файли зображень дозволені!'), false);
+  if (!file.originalname.match(/\.(jpg|jpeg|png|gif|webp|pdf|doc|docx)$/)) {
+    return callback(new Error('Тільки файли зображень та документів дозволені!'), false);
   }
   callback(null, true);
 };
@@ -31,5 +31,14 @@ export const multerConfig = {
   fileFilter: audioFileFilter,
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB max
+  },
+};
+
+// Конфіг для файлів домашнього завдання (фото, документи) - також в памяті
+export const homeworkFilesConfig = {
+  storage: memoryStorage(),
+  fileFilter: imageFileFilter,
+  limits: {
+    fileSize: 15 * 1024 * 1024, // 15MB max
   },
 };

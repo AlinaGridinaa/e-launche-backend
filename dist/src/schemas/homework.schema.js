@@ -17,10 +17,12 @@ let Homework = class Homework {
     lessonNumber;
     answer;
     attachments;
+    fileAttachments;
     status;
     curatorId;
     score;
     feedback;
+    audioFeedback;
     reviewedAt;
     submittedAt;
 };
@@ -46,6 +48,10 @@ __decorate([
     __metadata("design:type", Array)
 ], Homework.prototype, "attachments", void 0);
 __decorate([
+    (0, mongoose_1.Prop)({ type: [String], default: [] }),
+    __metadata("design:type", Array)
+], Homework.prototype, "fileAttachments", void 0);
+__decorate([
     (0, mongoose_1.Prop)({ default: 'pending' }),
     __metadata("design:type", String)
 ], Homework.prototype, "status", void 0);
@@ -61,6 +67,10 @@ __decorate([
     (0, mongoose_1.Prop)(),
     __metadata("design:type", String)
 ], Homework.prototype, "feedback", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], Homework.prototype, "audioFeedback", void 0);
 __decorate([
     (0, mongoose_1.Prop)(),
     __metadata("design:type", Date)

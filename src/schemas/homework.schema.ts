@@ -18,7 +18,10 @@ export class Homework {
   answer: string; // Відповідь студента
 
   @Prop({ type: [String], default: [] })
-  attachments: string[]; // URL прикріплених файлів
+  attachments: string[]; // URL прикріплених посилань
+
+  @Prop({ type: [String], default: [] })
+  fileAttachments: string[]; // URL завантажених файлів (фото, документи)
 
   @Prop({ default: 'pending' })
   status: 'pending' | 'reviewed' | 'approved' | 'needs_revision'; // pending - очікує перевірки, reviewed - переглянуто, approved - затверджено, needs_revision - на доопрацювання

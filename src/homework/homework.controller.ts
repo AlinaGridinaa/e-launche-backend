@@ -1,7 +1,8 @@
-import { Controller, Post, Get, Body, UseGuards, Req, Param, ParseIntPipe } from '@nestjs/common';
+import { Controller, Post, Get, Req, Param, ParseIntPipe, UseGuards, UseInterceptors, UploadedFiles } from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { HomeworkService } from './homework.service';
-import { SubmitHomeworkDto } from './dto/submit-homework.dto';
+import { homeworkFilesConfig } from '../config/multer.config';
 
 @Controller('homework')
 @UseGuards(JwtAuthGuard)
@@ -9,9 +10,20 @@ export class HomeworkController {
   constructor(private readonly homeworkService: HomeworkService) {}
 
   @Post('submit')
-  async submitHomework(@Req() req, @Body() dto: SubmitHomeworkDto) {
+  @UseInterceptors(FilesInterceptor('files', 5, homeworkFilesConfig))
+  async submitHomework(
+    @Req() req,
+    @UploadedFiles() files?: Express.Multer.File[],
+  ) {
     const userId = req.user._id.toString();
-    return this.homeworkService.submitHomework(userId, dto);
+    // Отримуємо дані з body (не можна використовувати @Body() з FormData)
+    const dto = {
+      moduleId: req.body.moduleId,
+      lessonNumber: req.body.lessonNumber,
+      answer: req.body.answer,
+      attachments: req.body.attachments,
+    };
+    return this.homeworkService.submitHomework(userId, dto, files);
   }
 
   @Get('my/:moduleId/:lessonNumber')

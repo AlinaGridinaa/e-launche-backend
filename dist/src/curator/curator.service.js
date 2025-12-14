@@ -20,6 +20,7 @@ const homework_schema_1 = require("../schemas/homework.schema");
 const user_schema_1 = require("../schemas/user.schema");
 const module_schema_1 = require("../schemas/module.schema");
 const notifications_service_1 = require("../notifications/notifications.service");
+const cloudinary_config_1 = require("../config/cloudinary.config");
 let CuratorService = class CuratorService {
     homeworkModel;
     userModel;
@@ -50,16 +51,32 @@ let CuratorService = class CuratorService {
                 lessonNumber: homework.lessonNumber,
                 answer: homework.answer,
                 attachments: homework.attachments,
+                fileAttachments: homework.fileAttachments,
                 status: homework.status,
                 score: homework.score,
                 feedback: homework.feedback,
+                audioFeedback: homework.audioFeedback,
                 submittedAt: homework.submittedAt,
                 reviewedAt: homework.reviewedAt,
             };
         }));
         return enrichedHomeworks;
     }
-    async reviewHomework(curatorId, homeworkId, score, feedback) {
+    async uploadAudioFeedback(buffer) {
+        try {
+            console.log('Uploading audio buffer, size:', buffer.length, 'bytes');
+            const audioUrl = await (0, cloudinary_config_1.uploadBufferToCloudinary)(buffer, 'audio-feedback', 'video');
+            console.log('Audio uploaded successfully:', audioUrl);
+            return { audioUrl };
+        }
+        catch (error) {
+            console.error('Failed to upload audio to Cloudinary:', error);
+            console.error('Buffer size:', buffer.length);
+            console.error('Error details:', error.message);
+            throw new Error(`Не вдалося завантажити аудіо: ${error.message}`);
+        }
+    }
+    async reviewHomework(curatorId, homeworkId, score, feedback, audioFeedback) {
         const homework = await this.homeworkModel.findById(homeworkId);
         if (!homework) {
             throw new common_1.NotFoundException('Домашнє завдання не знайдено');
@@ -77,6 +94,7 @@ let CuratorService = class CuratorService {
             homework.score = score;
         }
         homework.feedback = feedback;
+        homework.audioFeedback = audioFeedback;
         homework.status = 'reviewed';
         homework.reviewedAt = new Date();
         await homework.save();
@@ -102,11 +120,12 @@ let CuratorService = class CuratorService {
             id: homework._id,
             score: homework.score,
             feedback: homework.feedback,
+            audioFeedback: homework.audioFeedback,
             status: homework.status,
             reviewedAt: homework.reviewedAt,
         };
     }
-    async returnForRevision(curatorId, homeworkId, feedback) {
+    async returnForRevision(curatorId, homeworkId, feedback, audioFeedback) {
         const homework = await this.homeworkModel.findById(homeworkId);
         if (!homework) {
             throw new common_1.NotFoundException('Домашнє завдання не знайдено');
@@ -121,6 +140,7 @@ let CuratorService = class CuratorService {
             : `Урок ${homework.lessonNumber}`;
         homework.curatorId = curatorId;
         homework.feedback = feedback;
+        homework.audioFeedback = audioFeedback;
         homework.status = 'needs_revision';
         homework.reviewedAt = new Date();
         homework.score = undefined;
@@ -143,6 +163,7 @@ let CuratorService = class CuratorService {
         return {
             id: homework._id,
             feedback: homework.feedback,
+            audioFeedback: homework.audioFeedback,
             status: homework.status,
             reviewedAt: homework.reviewedAt,
         };

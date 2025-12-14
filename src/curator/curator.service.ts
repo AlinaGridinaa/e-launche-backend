@@ -43,6 +43,7 @@ export class CuratorService {
           lessonNumber: homework.lessonNumber,
           answer: homework.answer,
           attachments: homework.attachments,
+          fileAttachments: homework.fileAttachments,
           status: homework.status,
           score: homework.score,
           feedback: homework.feedback,

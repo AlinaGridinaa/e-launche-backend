@@ -4,7 +4,7 @@ export declare class User {
     email: string;
     password: string;
     firstName: string;
-    lastName: string;
+    lastName?: string;
     phoneOrTelegram?: string;
     group?: string;
     accessUntil?: Date;

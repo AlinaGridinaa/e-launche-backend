@@ -19,6 +19,7 @@ const mongoose_2 = require("mongoose");
 const homework_schema_1 = require("../schemas/homework.schema");
 const user_schema_1 = require("../schemas/user.schema");
 const module_schema_1 = require("../schemas/module.schema");
+const cloudinary_config_1 = require("../config/cloudinary.config");
 let HomeworkService = class HomeworkService {
     homeworkModel;
     userModel;
@@ -28,7 +29,23 @@ let HomeworkService = class HomeworkService {
         this.userModel = userModel;
         this.moduleModel = moduleModel;
     }
-    async submitHomework(userId, dto) {
+    async submitHomework(userId, dto, files) {
+        let attachments = [];
+        if (dto.attachments) {
+            try {
+                attachments = typeof dto.attachments === 'string'
+                    ? JSON.parse(dto.attachments)
+                    : dto.attachments;
+            }
+            catch (error) {
+                console.error('Failed to parse attachments:', error);
+                attachments = [];
+            }
+        }
+        const lessonNumber = parseInt(dto.lessonNumber, 10);
+        if (isNaN(lessonNumber)) {
+            throw new common_1.BadRequestException('lessonNumber повинен бути числом');
+        }
         const user = await this.userModel.findById(userId);
         if (!user) {
             throw new common_1.NotFoundException('Користувача не знайдено');
@@ -37,14 +54,26 @@ let HomeworkService = class HomeworkService {
         if (!module) {
             throw new common_1.NotFoundException('Модуль не знайдено');
         }
+        let fileAttachments = [];
+        if (files && files.length > 0) {
+            try {
+                fileAttachments = await Promise.all(files.map(file => (0, cloudinary_config_1.uploadBufferToCloudinary)(file.buffer, 'homework-files', 'raw')));
+                console.log('Files uploaded successfully:', fileAttachments);
+            }
+            catch (error) {
+                console.error('Failed to upload files:', error);
+                throw new common_1.BadRequestException(`Помилка завантаження файлів: ${error.message}`);
+            }
+        }
         const existingHomework = await this.homeworkModel.findOne({
             userId,
             moduleId: dto.moduleId,
-            lessonNumber: dto.lessonNumber,
+            lessonNumber: lessonNumber,
         });
         if (existingHomework) {
             existingHomework.answer = dto.answer;
-            existingHomework.attachments = dto.attachments || [];
+            existingHomework.attachments = attachments;
+            existingHomework.fileAttachments = fileAttachments;
             existingHomework.status = 'pending';
             existingHomework.submittedAt = new Date();
             existingHomework.curatorId = user.curatorId;
@@ -57,9 +86,10 @@ let HomeworkService = class HomeworkService {
         const homework = new this.homeworkModel({
             userId,
             moduleId: dto.moduleId,
-            lessonNumber: dto.lessonNumber,
+            lessonNumber: lessonNumber,
             answer: dto.answer,
-            attachments: dto.attachments || [],
+            attachments: attachments,
+            fileAttachments: fileAttachments,
             status: 'pending',
             curatorId: user.curatorId,
             submittedAt: new Date(),

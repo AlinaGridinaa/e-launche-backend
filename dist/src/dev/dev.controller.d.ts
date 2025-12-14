@@ -86,7 +86,7 @@ export declare class DevController {
         user: {
             email: string;
             firstName: string;
-            lastName: string;
+            lastName: string | undefined;
             faculty: string;
         };
         error?: undefined;

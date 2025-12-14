@@ -12,34 +12,43 @@ export declare class CuratorController {
         lessonNumber: number;
         answer: string;
         attachments: string[];
-        status: "approved" | "needs_revision" | "pending" | "reviewed";
+        fileAttachments: string[];
+        status: "pending" | "reviewed" | "approved" | "needs_revision";
         score: number | undefined;
         feedback: string | undefined;
+        audioFeedback: string | undefined;
         submittedAt: Date;
         reviewedAt: Date | undefined;
     }[]>;
+    uploadAudio(file: Express.Multer.File): Promise<{
+        audioUrl: string;
+    }>;
     reviewHomework(req: any, homeworkId: string, reviewDto: {
         score?: number;
         feedback?: string;
+        audioFeedback?: string;
     }): Promise<{
         id: import("mongoose").Types.ObjectId;
         score: number | undefined;
         feedback: string | undefined;
+        audioFeedback: string | undefined;
         status: "reviewed";
         reviewedAt: Date;
     }>;
     returnForRevision(req: any, homeworkId: string, returnDto: {
         feedback: string;
+        audioFeedback?: string;
     }): Promise<{
         id: import("mongoose").Types.ObjectId;
         feedback: string;
+        audioFeedback: string | undefined;
         status: "needs_revision";
         reviewedAt: Date;
     }>;
     getMyStudents(req: any): Promise<{
         id: import("mongoose").Types.ObjectId;
         firstName: string;
-        lastName: string;
+        lastName: string | undefined;
         email: string;
         faculty: string | undefined;
         completedLessonsCount: number;

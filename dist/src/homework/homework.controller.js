@@ -14,17 +14,24 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.HomeworkController = void 0;
 const common_1 = require("@nestjs/common");
+const platform_express_1 = require("@nestjs/platform-express");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 const homework_service_1 = require("./homework.service");
-const submit_homework_dto_1 = require("./dto/submit-homework.dto");
+const multer_config_1 = require("../config/multer.config");
 let HomeworkController = class HomeworkController {
     homeworkService;
     constructor(homeworkService) {
         this.homeworkService = homeworkService;
     }
-    async submitHomework(req, dto) {
+    async submitHomework(req, files) {
         const userId = req.user._id.toString();
-        return this.homeworkService.submitHomework(userId, dto);
+        const dto = {
+            moduleId: req.body.moduleId,
+            lessonNumber: req.body.lessonNumber,
+            answer: req.body.answer,
+            attachments: req.body.attachments,
+        };
+        return this.homeworkService.submitHomework(userId, dto, files);
     }
     async getMyHomework(req, moduleId, lessonNumber) {
         const userId = req.user._id.toString();
@@ -38,10 +45,11 @@ let HomeworkController = class HomeworkController {
 exports.HomeworkController = HomeworkController;
 __decorate([
     (0, common_1.Post)('submit'),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FilesInterceptor)('files', 5, multer_config_1.homeworkFilesConfig)),
     __param(0, (0, common_1.Req)()),
-    __param(1, (0, common_1.Body)()),
+    __param(1, (0, common_1.UploadedFiles)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, submit_homework_dto_1.SubmitHomeworkDto]),
+    __metadata("design:paramtypes", [Object, Array]),
     __metadata("design:returntype", Promise)
 ], HomeworkController.prototype, "submitHomework", null);
 __decorate([

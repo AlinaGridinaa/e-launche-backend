@@ -9,7 +9,7 @@ export declare class AuthController {
         user: {
             email: string;
             firstName: string;
-            lastName: string;
+            lastName?: string;
             phoneOrTelegram?: string;
             group?: string;
             accessUntil?: Date;
@@ -81,7 +81,7 @@ export declare class AuthController {
         user: {
             email: string;
             firstName: string;
-            lastName: string;
+            lastName?: string;
             phoneOrTelegram?: string;
             group?: string;
             accessUntil?: Date;
