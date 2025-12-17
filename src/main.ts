@@ -5,9 +5,14 @@ import cookieParser from 'cookie-parser';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import { mkdirSync, existsSync } from 'fs';
+import * as express from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  
+  // Збільшуємо ліміт для JSON та URL-encoded тіл запитів
+  app.use(express.json({ limit: '50mb' }));
+  app.use(express.urlencoded({ limit: '50mb', extended: true }));
   
   // Створюємо папку для аватарів, якщо не існує
   const uploadsPath = join(__dirname, '..', 'uploads', 'avatars');

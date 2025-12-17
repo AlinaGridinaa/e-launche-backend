@@ -28,11 +28,11 @@ export class ModulesService {
   }
 
   async findAll(): Promise<Module[]> {
-    return this.moduleModel.find().exec();
+    return this.moduleModel.find().sort({ number: 1 }).exec();
   }
 
   async findAllWithUserProgress(userId: string): Promise<Module[]> {
-    const modules = await this.moduleModel.find().lean().exec();
+    const modules = await this.moduleModel.find().sort({ number: 1 }).lean().exec();
     const user = await this.userModel.findById(userId).exec();
 
     if (!user) {

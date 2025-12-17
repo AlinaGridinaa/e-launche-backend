@@ -39,6 +39,6 @@ export const homeworkFilesConfig = {
   storage: memoryStorage(),
   fileFilter: imageFileFilter,
   limits: {
-    fileSize: 15 * 1024 * 1024, // 15MB max
+    fileSize: 20 * 1024 * 1024, // 20MB max
   },
 };
