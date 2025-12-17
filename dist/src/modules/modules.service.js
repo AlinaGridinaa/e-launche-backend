@@ -40,10 +40,10 @@ let ModulesService = class ModulesService {
         }
     }
     async findAll() {
-        return this.moduleModel.find().exec();
+        return this.moduleModel.find().sort({ number: 1 }).exec();
     }
     async findAllWithUserProgress(userId) {
-        const modules = await this.moduleModel.find().lean().exec();
+        const modules = await this.moduleModel.find().sort({ number: 1 }).lean().exec();
         const user = await this.userModel.findById(userId).exec();
         if (!user) {
             return modules.map(module => ({
@@ -60,6 +60,7 @@ let ModulesService = class ModulesService {
             return {
                 ...module,
                 isLocked: module.isLocked || isTariffLocked,
+                isTariffLocked,
                 lessons: module.lessons.map(lesson => ({
                     ...lesson,
                     isCompleted: user.completedLessons?.some(cl => cl.moduleId.toString() === module._id.toString() && cl.lessonNumber === lesson.number) || false,
@@ -89,6 +90,7 @@ let ModulesService = class ModulesService {
         return {
             ...module,
             isLocked: module.isLocked || isTariffLocked,
+            isTariffLocked,
             lessons: module.lessons.map(lesson => ({
                 ...lesson,
                 isCompleted: user.completedLessons?.some(cl => cl.moduleId.toString() === module._id.toString() && cl.lessonNumber === lesson.number) || false,

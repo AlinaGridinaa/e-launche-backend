@@ -55,6 +55,7 @@ export class ModulesService {
       return {
         ...module,
         isLocked: module.isLocked || isTariffLocked, // Модуль заблокований якщо або вручну заблокований, або за тарифом
+        isTariffLocked, // Додаємо окреме поле для розрізнення типу блокування
         lessons: module.lessons.map(lesson => ({
           ...lesson,
           isCompleted: user.completedLessons?.some(
@@ -92,6 +93,7 @@ export class ModulesService {
     return {
       ...module,
       isLocked: module.isLocked || isTariffLocked,
+      isTariffLocked, // Додаємо окреме поле для розрізнення типу блокування
       lessons: module.lessons.map(lesson => ({
         ...lesson,
         isCompleted: user.completedLessons?.some(

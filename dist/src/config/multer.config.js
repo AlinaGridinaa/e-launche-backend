@@ -37,7 +37,7 @@ exports.homeworkFilesConfig = {
     storage: (0, multer_1.memoryStorage)(),
     fileFilter: exports.imageFileFilter,
     limits: {
-        fileSize: 15 * 1024 * 1024,
+        fileSize: 20 * 1024 * 1024,
     },
 };
 //# sourceMappingURL=multer.config.js.map

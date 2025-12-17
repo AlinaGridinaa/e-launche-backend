@@ -13,7 +13,7 @@ export declare class CuratorController {
         answer: string;
         attachments: string[];
         fileAttachments: string[];
-        status: "pending" | "reviewed" | "approved" | "needs_revision";
+        status: "approved" | "needs_revision" | "pending" | "reviewed";
         score: number | undefined;
         feedback: string | undefined;
         audioFeedback: string | undefined;
