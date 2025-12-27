@@ -53,7 +53,7 @@ export class HomeworkService {
       try {
         fileAttachments = await Promise.all(
           files.map(file => 
-            uploadBufferToCloudinary(file.buffer, 'homework-files', 'auto')
+            uploadBufferToCloudinary(file.buffer, 'homework-files', 'auto', file.originalname)
           )
         );
         console.log('Files uploaded successfully:', fileAttachments);
