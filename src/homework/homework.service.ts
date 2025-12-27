@@ -78,9 +78,10 @@ export class HomeworkService {
       existingHomework.status = 'pending';
       existingHomework.submittedAt = new Date();
       existingHomework.curatorId = user.curatorId;
-      // Скидаємо попередню оцінку
+      // Скидаємо попередню оцінку та відгуки
       existingHomework.score = undefined;
       existingHomework.feedback = undefined;
+      existingHomework.audioFeedback = undefined;
       existingHomework.reviewedAt = undefined;
       
       await existingHomework.save();
@@ -109,9 +110,31 @@ export class HomeworkService {
       userId,
       moduleId,
       lessonNumber,
-    });
+    }).lean();
 
-    return homework;
+    if (!homework) {
+      return null;
+    }
+
+    // Додаємо інформацію про модуль
+    const module = await this.moduleModel.findById(homework.moduleId);
+    
+    return {
+      id: homework._id,
+      moduleId: homework.moduleId,
+      moduleTitle: module?.title || 'Невідомий модуль',
+      moduleNumber: module?.number || 0,
+      lessonNumber: homework.lessonNumber,
+      answer: homework.answer,
+      attachments: homework.attachments,
+      fileAttachments: homework.fileAttachments,
+      status: homework.status,
+      score: homework.score,
+      feedback: homework.feedback,
+      audioFeedback: homework.audioFeedback,
+      submittedAt: homework.submittedAt,
+      reviewedAt: homework.reviewedAt,
+    };
   }
 
   async getMyAllHomeworks(userId: string) {
@@ -129,9 +152,11 @@ export class HomeworkService {
           lessonNumber: hw.lessonNumber,
           answer: hw.answer,
           attachments: hw.attachments,
+          fileAttachments: hw.fileAttachments,
           status: hw.status,
           score: hw.score,
           feedback: hw.feedback,
+          audioFeedback: hw.audioFeedback,
           submittedAt: hw.submittedAt,
           reviewedAt: hw.reviewedAt,
         };
