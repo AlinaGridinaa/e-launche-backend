@@ -116,9 +116,17 @@ export class AchievementsService {
   }
 
   // Отримати всі заявки на нагороди (для куратора)
-  async getAllPendingAchievements() {
+  async getAllPendingAchievements(curatorId: string) {
+    // Знаходимо всіх студентів цього куратора
+    const students = await this.userModel.find({ curatorId }).select('_id').exec();
+    const studentIds = students.map(s => s._id.toString());
+
+    // Отримуємо тільки заявки студентів цього куратора
     const achievements = await this.userAchievementModel
-      .find({ status: 'pending' })
+      .find({ 
+        status: 'pending',
+        userId: { $in: studentIds }
+      })
       .populate('userId', 'firstName lastName email')
       .sort({ submittedAt: -1 })
       .exec();

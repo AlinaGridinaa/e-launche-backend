@@ -132,7 +132,8 @@ export class AchievementsController {
       };
     }
 
-    const achievements = await this.achievementsService.getAllPendingAchievements();
+    const curatorId = req.user._id || req.user.sub;
+    const achievements = await this.achievementsService.getAllPendingAchievements(curatorId);
     return {
       success: true,
       data: achievements,
